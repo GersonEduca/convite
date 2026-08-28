@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Casamento</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cormorant+Garamond:wght@500;700&family=Great+Vibes&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #222;
+            font-family: Poppins, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 12px;
+        }
+
+        .phone {
+            width: clamp(320px, 92vw, 390px);
+            background: white;
+            border-radius: 35px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .4);
+        }
+
+        /* ======================= */
+
+        .hero {
+            background: url("bg-top.png") center/cover no-repeat;
+            padding: 55px 28px 44px;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h2 {
+            font-family: "Cormorant Garamond";
+            font-size: 52px;
+        }
+
+        .hero h1 {
+            font-family: "Great Vibes";
+            font-size: 70px;
+            color: #E6B35B;
+            font-weight: normal;
+            margin-top: 10px;
+        }
+
+        .line {
+            margin: 20px auto;
+            width: 170px;
+            height: 2px;
+            background: #d9aa56;
+        }
+
+        .hero p {
+            margin-top: 25px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .date {
+            margin-top: 35px;
+            font-size: 22px;
+            color: #F0C16B;
+        }
+
+        /* ===================== */
+
+        .confirm {
+            padding: 40px 20px 30px;
+        }
+
+        .confirm h3 {
+            text-align: center;
+            color: #B58A43;
+            font-size: 34px;
+            font-family: "Cormorant Garamond";
+        }
+
+        .confirm p {
+            text-align: center;
+            margin: 10px 0 30px;
+        }
+
+        .card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 18px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+        }
+
+        .name {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 30px;
+            font-size: 15px;
+            transition: transform .2s ease;
+        }
+
+        .ok {
+            background: #0C2D67;
+            color: white;
+        }
+
+        .no {
+            background: white;
+            border: 2px solid #D4A44D;
+            color: #B17B1F;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        /* ================= */
+
+        .footer {
+            background: url("bg-top.png") center/cover no-repeat;
+            padding: 30px 18px;
+            color: white;
+            text-align: center;
+            border-radius: 28px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, .22);
+            width: calc(100% - 14px);
+            max-width: 360px;
+            margin: -56px auto 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer h3 {
+            font-family: "Great Vibes";
+            font-size: 38px;
+            color: #E5B25B;
+            margin-bottom: 20px;
+        }
+
+        .menu {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .item {
+            flex: 1;
+            min-width: 90px;
+        }
+
+        .item button {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.12);
+            border: 2px solid #D4A44D;
+            font-size: 28px;
+            color: #E6B35B;
+        }
+
+        .item p {
+            margin-top: 10px;
+            font-size: 15px;
+            color: white;
+        }
+
+        @media (max-width: 420px) {
+            .hero {
+                padding: 45px 20px 34px;
+            }
+
+            .hero h2 {
+                font-size: 40px;
+            }
+
+            .hero h1 {
+                font-size: 52px;
+            }
+
+            .date {
+                font-size: 20px;
+            }
+
+            .confirm {
+                padding: 30px 16px 30px;
+            }
+
+            .confirm h3 {
+                font-size: 30px;
+            }
+
+            .card {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .footer {
+                margin: -48px auto 0;
+                padding: 26px 16px;
+            }
+
+            .footer h3 {
+                font-size: 32px;
+            }
+
+            .item button {
+                width: 62px;
+                height: 62px;
+                font-size: 24px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="phone">
+
+        <section class="hero">
+
+            <h2>CASAMENTO</h2>
+
+            <h1>Carine & Gerson</h1>
+
+            <div class="line"></div>
+
+            <p>
+
+                Estamos muito felizes em compartilhar<br>
+                esse momento especial com você!
+
+            </p>
+
+            <div class="date">
+
+                21 • 11 • 2026
+
+            </div>
+
+        </section>
+
+        <section class="confirm">
+
+            <h3>Confirme sua presença</h3>
+
+            <p>Escolha sua resposta abaixo.</p>
+
+            <div class="card">
+
+                <div class="name">Nome 1</div>
+
+                <div class="buttons">
+
+                    <button class="ok">✔ Confirmar</button>
+
+                    <button class="no">✖ Negar</button>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="name">Nome 2</div>
+
+                <div class="buttons">
+
+                    <button class="ok">✔ Confirmar</button>
+
+                    <button class="no">✖ Negar</button>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="name">Nome 3</div>
+
+                <div class="buttons">
+
+                    <button class="ok">✔ Confirmar</button>
+
+                    <button class="no">✖ Negar</button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="footer">
+
+            <h3>Informações</h3>
+
+            <div class="menu">
+
+                <div class="item">
+
+                    <button onclick="window.open('https://maps.google.com')">
+                        📍
+                    </button>
+
+                    <p>Local</p>
+
+                </div>
+
+                <div class="item">
+
+                    <button onclick="window.open('https://lista.mercadolivre.com.br')">
+                        🎁
+                    </button>
+
+                    <p>Presentes</p>
+
+                </div>
+
+                <div class="item">
+
+                    <button onclick="window.open('https://calendar.google.com')">
+                        📅
+                    </button>
+
+                    <p>Data</p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</body>
+
+</html>
