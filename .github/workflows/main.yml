@@ -1,0 +1,21 @@
+name: Check PR Source Branch
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  check-origin:
+    name: Validar origem do Pull Request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar se a branch de origem é a develop
+        if: github.head_ref != 'develop'
+        run: |
+          echo "=========================================================================="
+          echo "ERRO: Pull Requests para a branch 'main' só são permitidos a partir da 'develop'."
+          echo "Sua branch de origem atual é: '${{ github.head_ref }}'"
+          echo "=========================================================================="
+          exit 1
