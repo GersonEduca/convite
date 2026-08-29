@@ -481,6 +481,7 @@
     </div>
 
     <script>
+        const familySlug = '{{ family_slug|default:"" }}';
         const scrollTargets = [document.body, document.querySelector('.phone')].filter(Boolean);
 
         function showScrollbarsForTouch(target) {
@@ -506,9 +507,11 @@
         });
 
         async function getGuests() {
-            const response = await fetch('/api/guests/');
+            const url = familySlug ? `/api/families/${familySlug}/` : '/api/guests/';
+            const response = await fetch(url);
             if (!response.ok) throw new Error('Nao foi possivel carregar os convidados.');
-            return response.json();
+            const payload = await response.json();
+            return familySlug ? payload.members : payload;
         }
 
         function renderGuests(guests) {
