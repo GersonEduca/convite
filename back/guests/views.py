@@ -19,19 +19,38 @@ def invitation(request, family_slug=None):
 
 @require_GET
 def guests(request):
-    data = Guest.objects.values('id', 'name', 'response', 'family_head_id', 'slug')
-    return JsonResponse(list(data), safe=False)
+    guests = Guest.objects.all().order_by('name')
+    data = []
+    for guest in guests:
+        item = {
+            'id': guest.id,
+            'name': guest.name,
+            'first_name': guest.first_name,
+            'response': guest.response,
+            'family_head_id': guest.family_head_id,
+            'slug': guest.slug,
+        }
+        data.append(item)
+    return JsonResponse(data, safe=False)
 
 
 @require_GET
 def family_guests(request, family_slug):
     family_head = get_object_or_404(Guest, slug=family_slug)
-    members = Guest.objects.filter(Q(pk=family_head.pk) | Q(family_head=family_head)).order_by('name').values(
-        'id', 'name', 'response', 'family_head_id', 'slug'
-    )
+    members = Guest.objects.filter(Q(pk=family_head.pk) | Q(family_head=family_head)).order_by('name')
+    payload_members = []
+    for guest in members:
+        payload_members.append({
+            'id': guest.id,
+            'name': guest.name,
+            'first_name': guest.first_name,
+            'response': guest.response,
+            'family_head_id': guest.family_head_id,
+            'slug': guest.slug,
+        })
     return JsonResponse({
-        'head': {'id': family_head.id, 'name': family_head.name},
-        'members': list(members),
+        'head': {'id': family_head.id, 'name': family_head.name, 'first_name': family_head.first_name},
+        'members': payload_members,
     })
 
 

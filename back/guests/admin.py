@@ -51,6 +51,7 @@ class GuestAdmin(admin.ModelAdmin):
                             return idx
                     return -1
 
+                index_id = header_index('ID')
                 index_name = header_index('Convidados')
                 index_chefe = header_index('Chefe')
                 index_telefone = header_index('Telefone')
@@ -71,11 +72,18 @@ class GuestAdmin(admin.ModelAdmin):
                     value = row[index]
                     return '' if value is None else normalize_name(value)
 
-                def find_or_create_guest(name):
+                def find_or_create_guest(name, source_id=''):
                     normalized = normalize_name(name)
+                    if source_id:
+                        source_key = slugify(str(source_id))
+                        guest = Guest.objects.filter(name__iexact=normalized).filter(slug__icontains=source_key).first()
+                        if guest is not None:
+                            return guest
+
                     guest = Guest.objects.filter(name__iexact=normalized).order_by('id').first()
                     if guest is not None:
                         return guest
+
                     return Guest.objects.create(name=normalized)
 
                 def fix_duplicate_head_slugs():
@@ -87,6 +95,9 @@ class GuestAdmin(admin.ModelAdmin):
                 fix_duplicate_head_slugs()
 
                 created_map = {}
+                created_by_id = {}
+                created_by_name = {}
+
                 for row in rows[1:]:
                     if not row:
                         continue
@@ -95,16 +106,20 @@ class GuestAdmin(admin.ModelAdmin):
                     if not name:
                         continue
 
-                    key = name.lower()
+                    source_id = row_value(row, index_id)
+                    key = (source_id or name).lower()
                     if key not in created_map:
-                        created_map[key] = find_or_create_guest(name)
+                        created_map[key] = find_or_create_guest(name, source_id)
+                    if source_id:
+                        created_by_id[source_id.lower()] = created_map[key]
+                    created_by_name[name.lower()] = created_map[key]
 
                     guest = created_map[key]
                     guest.phone = row_value(row, index_telefone)
                     guest.notes = row_value(row, index_obs)
                     guest.family_head = None
                     if not guest.slug:
-                        guest.slug = guest.generate_unique_slug()
+                        guest.slug = guest.generate_unique_slug(source_id=source_id)
                     guest.save()
 
                 with transaction.atomic():
@@ -116,23 +131,32 @@ class GuestAdmin(admin.ModelAdmin):
                         if not name:
                             continue
 
+                        source_id = row_value(row, index_id)
                         chefe = row_value(row, index_chefe)
-                        guest = created_map.get(name.lower())
+                        guest_key = (source_id or name).lower()
+                        guest = created_map.get(guest_key)
                         if guest is None:
                             continue
 
-                        if chefe and chefe.lower() != name.lower():
-                            family_head_key = chefe.lower()
-                            family_head = created_map.get(family_head_key)
+                        family_head = None
+                        if chefe:
+                            chefe_ref = chefe.lower()
+                            family_head = created_by_id.get(chefe_ref)
+                            if family_head is None:
+                                family_head = created_by_name.get(chefe_ref)
                             if family_head is None:
                                 family_head = find_or_create_guest(chefe)
-                                created_map[family_head_key] = family_head
-                            if not family_head.slug:
-                                family_head.slug = family_head.generate_unique_slug()
-                                family_head.save(update_fields=['slug'])
+                                created_by_name[chefe_ref] = family_head
+
+                        if family_head is not None:
                             guest.family_head = family_head
                         else:
                             guest.family_head = None
+
+                        if source_id and guest.slug in (None, ''):
+                            guest.slug = guest.generate_unique_slug(source_id=source_id)
+                        elif not guest.slug:
+                            guest.slug = guest.generate_unique_slug()
                         guest.save()
 
                 messages.success(request, f'Arquivo importado com sucesso. {len(created_map)} convidados foram processados.')

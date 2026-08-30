@@ -27,9 +27,23 @@ class Guest(models.Model):
     )
     slug = models.SlugField('Slug da família', max_length=120, unique=True, blank=True, null=True)
 
-    def generate_unique_slug(self):
+    @property
+    def first_name(self):
+        if not self.name:
+            return ''
+        return self.name.strip().split()[0]
+
+    def generate_unique_slug(self, source_id=None):
         base_slug = slugify(self.name) or 'convidado'
         candidate = base_slug
+
+        if source_id:
+            source_token = slugify(str(source_id))
+            if source_token:
+                candidate = f'{base_slug}-{source_token}'
+                if not Guest.objects.filter(slug=candidate).exclude(pk=self.pk).exists():
+                    return candidate
+
         counter = 2
         while Guest.objects.filter(slug=candidate).exclude(pk=self.pk).exists():
             candidate = f'{base_slug}-{counter}'
