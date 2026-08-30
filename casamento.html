@@ -48,6 +48,9 @@
             justify-content: center;
             align-items: flex-start;
             overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #b8892f #f5ebd9;
+            -webkit-overflow-scrolling: touch;
         }
 
         .phone {
@@ -60,6 +63,27 @@
             flex-direction: column;
             border-radius: 24px;
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+            scrollbar-width: thin;
+            scrollbar-color: #b8892f #f5ebd9;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body::-webkit-scrollbar,
+        .phone::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        body::-webkit-scrollbar-track,
+        .phone::-webkit-scrollbar-track {
+            background: #f5ebd9;
+            border-radius: 999px;
+        }
+
+        body::-webkit-scrollbar-thumb,
+        .phone::-webkit-scrollbar-thumb {
+            background: #b8892f;
+            border-radius: 999px;
         }
 
         /* ---------------------------------------------------------
@@ -288,12 +312,34 @@
             body {
                 padding: 0;
                 align-items: stretch;
+                scrollbar-width: none;
+            }
+
+            body::-webkit-scrollbar,
+            .phone::-webkit-scrollbar {
+                width: 0;
+                height: 0;
+                display: none;
+            }
+
+            body.scrollbar-visible,
+            .phone.scrollbar-visible {
+                scrollbar-width: thin;
+                scrollbar-color: #b8892f #f5ebd9;
+            }
+
+            body.scrollbar-visible::-webkit-scrollbar,
+            .phone.scrollbar-visible::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+                display: block;
             }
 
             .phone {
                 width: 100%;
                 min-height: 100dvh;
                 border-radius: 0;
+                scrollbar-width: none;
             }
 
             .confirm {
@@ -315,18 +361,51 @@
             }
         }
 
+        /* ==========================================================
+        DESKTOP
+        Mantém o layout exatamente igual ao mobile,
+        porém amplia proporcionalmente e centraliza tudo.
+        ========================================================== */
         @media (min-width: 700px) {
+
+            body {
+                padding: 40px;
+                justify-content: center;
+                align-items: center;
+            }
+
             .phone {
-                width: min(92vw, 560px);
-                max-height: min(92dvh, 820px);
+                width: min(90vw, 760px);
+                max-width: 760px;
+
+                max-height: calc(100vh - 80px);
+                overflow-y: auto;
+
+                border-radius: 28px;
+
+                display: flex;
+                flex-direction: column;
+            }
+
+            .hero,
+            .confirm,
+            .footer {
+                width: 100%;
             }
 
             .guest-list-panel {
-                width: min(100%, 460px);
+                width: min(100%, 560px);
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            #guests-list {
+                max-height: 360px;
             }
 
             .footer {
-                width: min(100%, 360px);
+                width: min(100%, 420px);
+                margin: 0 auto;
             }
         }
     </style>
@@ -402,6 +481,30 @@
     </div>
 
     <script>
+        const scrollTargets = [document.body, document.querySelector('.phone')].filter(Boolean);
+
+        function showScrollbarsForTouch(target) {
+            target.classList.add('scrollbar-visible');
+            clearTimeout(target._hideScrollbarTimer);
+            target._hideScrollbarTimer = setTimeout(() => {
+                target.classList.remove('scrollbar-visible');
+            }, 240);
+        }
+
+        scrollTargets.forEach((target) => {
+            target.addEventListener('touchstart', () => showScrollbarsForTouch(target), { passive: true });
+            target.addEventListener('touchmove', () => showScrollbarsForTouch(target), { passive: true });
+            target.addEventListener('scroll', () => showScrollbarsForTouch(target), { passive: true });
+            target.addEventListener('touchend', () => {
+                clearTimeout(target._hideScrollbarTimer);
+                target._hideScrollbarTimer = setTimeout(() => {
+                    target.classList.remove('scrollbar-visible');
+                }, 180);
+            }, { passive: true });
+            target.addEventListener('pointerdown', () => showScrollbarsForTouch(target), { passive: true });
+            target.addEventListener('pointermove', () => showScrollbarsForTouch(target), { passive: true });
+        });
+
         async function getGuests() {
             return new Promise((resolve) => {
                 setTimeout(() => {
