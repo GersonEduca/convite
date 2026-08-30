@@ -228,8 +228,14 @@
             border-radius: 30px;
             font-size: clamp(0.85rem, 3.2vw, 0.9375rem);
             min-height: 44px;
-            transition: transform .2s ease;
+            transition: transform .2s ease, opacity .2s ease, filter .2s ease;
             white-space: nowrap;
+        }
+
+        button:disabled {
+            cursor: default;
+            opacity: 0.45;
+            filter: grayscale(0.2);
         }
 
         .ok {
@@ -245,7 +251,7 @@
             flex: 1 1 45%;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             transform: scale(1.05);
         }
 
@@ -482,6 +488,7 @@
 
     <script>
         const familySlug = '{{ family_slug|default:"" }}';
+        let guestList = [];
         const scrollTargets = [document.body, document.querySelector('.phone')].filter(Boolean);
 
         function showScrollbarsForTouch(target) {
@@ -518,21 +525,31 @@
             const container = document.getElementById('guests-list');
             if (!container) return;
 
-            container.innerHTML = guests.map((guest) => `
-                <div class="card" data-id="${guest.id}">
-                    <div class="name">${guest.name}</div>
-                    <div class="buttons">
-                        <button class="ok" data-response="confirmed">✔ Confirmar</button>
-                        <button class="no" data-response="declined">✖ Negar</button>
+            container.innerHTML = guests.map((guest) => {
+                const response = guest.response || 'pending';
+                const isConfirmed = response === 'confirmed';
+                const isDeclined = response === 'declined';
+
+                return `
+                    <div class="card" data-id="${guest.id}" data-response="${response}">
+                        <div class="name">${guest.first_name || guest.name}</div>
+                        <div class="buttons">
+                            <button class="ok" data-response="confirmed" ${isConfirmed ? 'disabled' : ''}>
+                                ${isConfirmed ? '✔ Confirmado' : '✔ Confirmar'}
+                            </button>
+                            <button class="no" data-response="declined" ${isDeclined ? 'disabled' : ''}>
+                                ${isDeclined ? '✖ Negado' : '✖ Negar'}
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function initGuests() {
             try {
-                const guests = await getGuests();
-                renderGuests(guests);
+                guestList = await getGuests();
+                renderGuests(guestList);
             } catch (error) {
                 document.getElementById('guests-list').textContent = error.message;
             }
@@ -548,21 +565,29 @@
             if (!button) return;
 
             const card = button.closest('[data-id]');
-            button.disabled = true;
-            const response = await fetch(`/api/guests/${card.dataset.id}/respond/`, {
+            const selectedResponse = button.dataset.response;
+            const guestId = Number(card.dataset.id);
+
+            const guest = guestList.find((item) => Number(item.id) === guestId);
+            if (guest) {
+                guest.response = selectedResponse;
+            }
+            renderGuests(guestList);
+
+            const response = await fetch(`/api/guests/${guestId}/respond/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')
                 },
-                body: JSON.stringify({ response: button.dataset.response })
+                body: JSON.stringify({ response: selectedResponse })
             });
 
-            if (response.ok) {
-                card.querySelectorAll('button').forEach((item) => item.disabled = true);
-                card.dataset.response = button.dataset.response;
-            } else {
-                button.disabled = false;
+            if (!response.ok) {
+                if (guest) {
+                    guest.response = guest.response === selectedResponse ? 'pending' : guest.response;
+                }
+                renderGuests(guestList);
             }
         });
 
