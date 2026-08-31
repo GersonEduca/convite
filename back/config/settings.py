@@ -6,7 +6,7 @@ FRONT_DIR = BASE_DIR.parent / 'front'
 
 SECRET_KEY = 'django-insecure-convite-local'
 DEBUG = True
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
