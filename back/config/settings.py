@@ -1,12 +1,21 @@
+import environ
 from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 FRONT_DIR = BASE_DIR.parent / 'front'
 
-SECRET_KEY = 'django-insecure-convite-local'
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+env = environ.Env(
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
+    CSRF_TRUSTED_ORIGINS=(list, []),
+)
+
+environ.Env.read_env(BASE_DIR / '.env')
+
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-convite-local')
+DEBUG = env('DEBUG')
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -53,6 +62,8 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
 
 AUTH_PASSWORD_VALIDATORS = []
 LANGUAGE_CODE = 'pt-br'
