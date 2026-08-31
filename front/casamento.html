@@ -90,7 +90,7 @@
            HERO
            --------------------------------------------------------- */
         .hero {
-            background: url("bg-top.png") center/cover no-repeat;
+            background: url("/static/bg-top.png") center/cover no-repeat;
             padding: clamp(1.5rem, 7vw, 3rem) clamp(1rem, 5vw, 1.5rem) clamp(1.25rem, 6vw, 2rem);
             text-align: center;
             color: white;
@@ -228,8 +228,14 @@
             border-radius: 30px;
             font-size: clamp(0.85rem, 3.2vw, 0.9375rem);
             min-height: 44px;
-            transition: transform .2s ease;
+            transition: transform .2s ease, opacity .2s ease, filter .2s ease;
             white-space: nowrap;
+        }
+
+        button:disabled {
+            cursor: default;
+            opacity: 0.45;
+            filter: grayscale(0.2);
         }
 
         .ok {
@@ -245,7 +251,7 @@
             flex: 1 1 45%;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             transform: scale(1.05);
         }
 
@@ -253,7 +259,7 @@
            RODAPÉ
            --------------------------------------------------------- */
         .footer {
-            background: url("bg-top.png") center/cover no-repeat;
+            background: url("/static/bg-top.png") center/cover no-repeat;
             padding: clamp(1.25rem, 5vw, 1.75rem) clamp(1rem, 5vw, 1.25rem);
             color: white;
             text-align: center;
@@ -454,10 +460,10 @@
             <div class="menu">
 
                 <div class="item">
-                    <button onclick="window.open('https://maps.google.com')" aria-label="Local">
+                    <button onclick="window.open('https://maps.app.goo.gl/bzwzCPo7FLfLqZzs9')" aria-label="Local">
                         📍
                     </button>
-                    <p>Local</p>
+                    <p>Espaço Maná - Tatui</p>
                 </div>
 
                 <div class="item">
@@ -468,10 +474,10 @@
                 </div>
 
                 <div class="item">
-                    <button onclick="window.open('https://calendar.google.com')" aria-label="Data">
+                    <button onclick="window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text=Casamento%20Carine%20%26%20Gerson&dates=20261121T000000Z/20261122T000000Z&details=Dia%20do%20casamento%20de%20Carine%20e%20Gerson.&location=Espa%C3%A7o%20Man%C3%A1%20-%20Tatu%C3%AD')" aria-label="Data">
                         📅
                     </button>
-                    <p>Data</p>
+                    <p>21•11•2026</p>
                 </div>
 
             </div>
@@ -481,6 +487,8 @@
     </div>
 
     <script>
+        const familySlug = '{{ family_slug|default:"" }}';
+        let guestList = [];
         const scrollTargets = [document.body, document.querySelector('.phone')].filter(Boolean);
 
         function showScrollbarsForTouch(target) {
@@ -506,41 +514,82 @@
         });
 
         async function getGuests() {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve([
-                        { id: 1, name: 'Nome 1' },
-                        { id: 2, name: 'Nome 2' },
-                        { id: 3, name: 'Nome 3' },
-                        { id: 4, name: 'Nome 4' },
-                        { id: 5, name: 'Nome 5' },
-                        { id: 6, name: 'Nome 6' },
-                        { id: 7, name: 'Nome 7' },
-                        { id: 8, name: 'Nome 8' }
-                    ]);
-                }, 300);
-            });
+            const url = familySlug ? `/api/families/${familySlug}/` : '/api/guests/';
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Nao foi possivel carregar os convidados.');
+            const payload = await response.json();
+            return familySlug ? payload.members : payload;
         }
 
         function renderGuests(guests) {
             const container = document.getElementById('guests-list');
             if (!container) return;
 
-            container.innerHTML = guests.map((guest) => `
-                <div class="card" data-id="${guest.id}">
-                    <div class="name">${guest.name}</div>
-                    <div class="buttons">
-                        <button class="ok">✔ Confirmar</button>
-                        <button class="no">✖ Negar</button>
+            container.innerHTML = guests.map((guest) => {
+                const response = guest.response || 'pending';
+                const isConfirmed = response === 'confirmed';
+                const isDeclined = response === 'declined';
+
+                return `
+                    <div class="card" data-id="${guest.id}" data-response="${response}">
+                        <div class="name">${guest.first_name || guest.name}</div>
+                        <div class="buttons">
+                            <button class="ok" data-response="confirmed" ${isConfirmed ? 'disabled' : ''}>
+                                ${isConfirmed ? '✔ Confirmado' : '✔ Confirmar'}
+                            </button>
+                            <button class="no" data-response="declined" ${isDeclined ? 'disabled' : ''}>
+                                ${isDeclined ? '✖ Negado' : '✖ Negar'}
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function initGuests() {
-            const guests = await getGuests();
-            renderGuests(guests);
+            try {
+                guestList = await getGuests();
+                renderGuests(guestList);
+            } catch (error) {
+                document.getElementById('guests-list').textContent = error.message;
+            }
         }
+
+        function getCookie(name) {
+            const value = document.cookie.split('; ').find((row) => row.startsWith(`${name}=`));
+            return value ? decodeURIComponent(value.split('=')[1]) : '';
+        }
+
+        document.getElementById('guests-list').addEventListener('click', async (event) => {
+            const button = event.target.closest('button[data-response]');
+            if (!button) return;
+
+            const card = button.closest('[data-id]');
+            const selectedResponse = button.dataset.response;
+            const guestId = Number(card.dataset.id);
+
+            const guest = guestList.find((item) => Number(item.id) === guestId);
+            if (guest) {
+                guest.response = selectedResponse;
+            }
+            renderGuests(guestList);
+
+            const response = await fetch(`/api/guests/${guestId}/respond/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ response: selectedResponse })
+            });
+
+            if (!response.ok) {
+                if (guest) {
+                    guest.response = guest.response === selectedResponse ? 'pending' : guest.response;
+                }
+                renderGuests(guestList);
+            }
+        });
 
         initGuests();
     </script>
