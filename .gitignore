@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Virtual envs
+.venv/
+venv/
+
+# Local env files
+.env
+back/.env
+
+# OS
+.DS_Store
