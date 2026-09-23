@@ -53,7 +53,7 @@ class GuestAdmin(admin.ModelAdmin):
 
                 index_id = header_index('ID')
                 index_name = header_index('Convidados')
-                index_chefe = header_index('Chefe')
+                index_chefe_id = header_index('Chefe_Id')
                 index_telefone = header_index('Telefone')
                 index_obs = header_index('Observação')
 
@@ -66,6 +66,20 @@ class GuestAdmin(admin.ModelAdmin):
                         return ''
                     return ' '.join(str(value).strip().split())
 
+                def normalize_sheet_id(value):
+                    if value is None:
+                        return ''
+                    text = normalize_name(value)
+                    if not text or text.lower() == 'none':
+                        return ''
+                    try:
+                        numeric = float(text)
+                    except ValueError:
+                        return text
+                    if numeric.is_integer():
+                        return str(int(numeric))
+                    return text
+
                 def row_value(row, index):
                     if index < 0 or index >= len(row):
                         return ''
@@ -74,15 +88,21 @@ class GuestAdmin(admin.ModelAdmin):
 
                 def find_or_create_guest(name, source_id=''):
                     normalized = normalize_name(name)
-                    if source_id:
-                        source_key = slugify(str(source_id))
-                        guest = Guest.objects.filter(name__iexact=normalized).filter(slug__icontains=source_key).first()
-                        if guest is not None:
-                            return guest
 
-                    guest = Guest.objects.filter(name__iexact=normalized).order_by('id').first()
-                    if guest is not None:
-                        return guest
+                    if source_id:
+                        try:
+                            source_pk = int(source_id)
+                        except (ValueError, TypeError):
+                            source_pk = None
+
+                        if source_pk is not None:
+                            guest = Guest.objects.filter(pk=source_pk).first()
+                            if guest is not None:
+                                if guest.name != normalized:
+                                    guest.name = normalized
+                                    guest.save(update_fields=['name'])
+                                return guest
+                            return Guest.objects.create(id=source_pk, name=normalized)
 
                     return Guest.objects.create(name=normalized)
 
@@ -96,7 +116,6 @@ class GuestAdmin(admin.ModelAdmin):
 
                 created_map = {}
                 created_by_id = {}
-                created_by_name = {}
 
                 for row in rows[1:]:
                     if not row:
@@ -106,13 +125,12 @@ class GuestAdmin(admin.ModelAdmin):
                     if not name:
                         continue
 
-                    source_id = row_value(row, index_id)
+                    source_id = normalize_sheet_id(row_value(row, index_id))
                     key = (source_id or name).lower()
                     if key not in created_map:
                         created_map[key] = find_or_create_guest(name, source_id)
                     if source_id:
                         created_by_id[source_id.lower()] = created_map[key]
-                    created_by_name[name.lower()] = created_map[key]
 
                     guest = created_map[key]
                     guest.phone = row_value(row, index_telefone)
@@ -131,27 +149,23 @@ class GuestAdmin(admin.ModelAdmin):
                         if not name:
                             continue
 
-                        source_id = row_value(row, index_id)
-                        chefe = row_value(row, index_chefe)
+                        source_id = normalize_sheet_id(row_value(row, index_id))
+                        chefe_id = normalize_sheet_id(row_value(row, index_chefe_id))
                         guest_key = (source_id or name).lower()
                         guest = created_map.get(guest_key)
                         if guest is None:
                             continue
 
                         family_head = None
-                        if chefe:
-                            chefe_ref = chefe.lower()
-                            family_head = created_by_id.get(chefe_ref)
+                        if chefe_id:
+                            family_head = created_by_id.get(chefe_id.lower())
                             if family_head is None:
-                                family_head = created_by_name.get(chefe_ref)
-                            if family_head is None:
-                                family_head = find_or_create_guest(chefe)
-                                created_by_name[chefe_ref] = family_head
+                                try:
+                                    family_head = Guest.objects.filter(pk=int(chefe_id)).first()
+                                except (ValueError, TypeError):
+                                    family_head = None
 
-                        if family_head is not None:
-                            guest.family_head = family_head
-                        else:
-                            guest.family_head = None
+                        guest.family_head = family_head
 
                         if source_id and guest.slug in (None, ''):
                             guest.slug = guest.generate_unique_slug(source_id=source_id)
