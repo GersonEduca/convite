@@ -17,6 +17,11 @@ def invitation(request, family_slug=None):
     return render(request, 'casamento.html', context)
 
 
+@ensure_csrf_cookie
+def pix_contribution(request):
+    return render(request, 'pix.html')
+
+
 @require_GET
 def guests(request):
     guests = Guest.objects.all().order_by('name')
