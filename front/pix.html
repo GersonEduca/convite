@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Contribuição</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cormorant+Garamond:wght@500;700&family=Great+Vibes&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            margin: 0;
+            padding: clamp(0.75rem, 2.5vw, 1.25rem);
+            background: #f7f0e3;
+            font-family: Poppins, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #b8892f #f5ebd9;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .phone {
+            width: min(100%, 560px);
+            margin: 0 auto;
+            background: white;
+            overflow-x: hidden;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-radius: 24px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+            scrollbar-width: thin;
+            scrollbar-color: #b8892f #f5ebd9;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body::-webkit-scrollbar,
+        .phone::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        body::-webkit-scrollbar-track,
+        .phone::-webkit-scrollbar-track {
+            background: #f5ebd9;
+            border-radius: 999px;
+        }
+
+        body::-webkit-scrollbar-thumb,
+        .phone::-webkit-scrollbar-thumb {
+            background: #b8892f;
+            border-radius: 999px;
+        }
+
+        .hero {
+            background: url("/static/bg-top.png") center/cover no-repeat;
+            padding: clamp(1.5rem, 7vw, 3rem) clamp(1rem, 5vw, 1.5rem) clamp(1.25rem, 6vw, 2rem);
+            text-align: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .hero h2 {
+            font-family: "Cormorant Garamond", serif;
+            font-size: clamp(1.75rem, 8vw, 3.25rem);
+            letter-spacing: 0.04em;
+        }
+
+        .hero h1 {
+            font-family: "Great Vibes", cursive;
+            font-size: clamp(2.5rem, 12vw, 4.4rem);
+            color: #E6B35B;
+            font-weight: normal;
+            margin-top: 0.6rem;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .line {
+            margin: 1.25rem auto;
+            width: clamp(110px, 35vw, 170px);
+            height: 2px;
+            background: #d9aa56;
+        }
+
+        .hero p {
+            margin-top: 1rem;
+            font-size: clamp(0.9rem, 3.2vw, 1.125rem);
+            line-height: 1.6;
+        }
+
+        .date {
+            margin-top: 1.75rem;
+            font-size: clamp(1.05rem, 4vw, 1.375rem);
+            color: #F0C16B;
+            letter-spacing: 0.02em;
+        }
+
+        .gift {
+            flex: 1 1 auto;
+            padding: clamp(1.25rem, 5vw, 2rem) clamp(0.95rem, 4vw, 1.4rem) clamp(1.25rem, 5vw, 1.75rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .gift-intro {
+            text-align: center;
+            max-width: 520px;
+            margin-bottom: 1.25rem;
+        }
+
+        .gift-intro h3 {
+            color: #B58A43;
+            font-size: clamp(1.8rem, 7vw, 2.7rem);
+            font-family: "Cormorant Garamond", serif;
+            margin-bottom: 0.65rem;
+        }
+
+        .gift-intro p {
+            color: #4d4d4d;
+            line-height: 1.7;
+            font-size: clamp(0.9rem, 3vw, 1.05rem);
+        }
+
+        .pix-panel {
+            width: min(100%, 430px);
+            background: linear-gradient(180deg, #fffdf8 0%, #f9efe0 100%);
+            border: 2px solid #c99841;
+            border-radius: 24px;
+            padding: clamp(1rem, 4vw, 1.4rem);
+            box-shadow: 0 10px 24px rgba(181, 138, 67, 0.12);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .qr-wrap {
+            width: min(78vw, 220px);
+            aspect-ratio: 1;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e7d4a4;
+            display: grid;
+            place-items: center;
+            padding: 0.8rem;
+            box-shadow: inset 0 0 0 1px rgba(181, 138, 67, 0.15);
+        }
+
+        .qr-wrap img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .pix-code-box {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .pix-code-box textarea {
+            width: 100%;
+            min-height: 90px;
+            resize: none;
+            border: 1px solid #d7b466;
+            border-radius: 14px;
+            background: #fffdf9;
+            color: #2a2a2a;
+            padding: 0.85rem 0.9rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            font-family: Poppins, sans-serif;
+            outline: none;
+        }
+
+        .copy-btn {
+            align-self: center;
+            border: none;
+            border-radius: 999px;
+            background: #0C2D67;
+            color: white;
+            font-weight: 600;
+            padding: 0.8rem 1.2rem;
+            min-height: 44px;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .pix-meta {
+            width: min(100%, 430px);
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding: 0.9rem 1rem;
+            border-radius: 18px;
+            background: #fffaf0;
+            border: 1px solid #f0d39e;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
+        }
+
+        .pix-meta-item {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pix-meta-label {
+            display: block;
+            color: #8a6a2a;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.35rem;
+        }
+
+        .pix-meta-value {
+            color: #2d2d2d;
+            font-weight: 600;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .footer {
+            background: url("/static/bg-top.png") center/cover no-repeat;
+            padding: clamp(1.25rem, 5vw, 1.75rem) clamp(1rem, 5vw, 1.25rem);
+            color: white;
+            text-align: center;
+            border-radius: 28px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, .22);
+            width: min(100%, 360px);
+            max-width: 360px;
+            margin: 1.5rem auto 0;
+            position: relative;
+            z-index: 1;
+            align-self: center;
+        }
+
+        .footer h3 {
+            font-family: "Great Vibes", cursive;
+            font-size: clamp(1.75rem, 7vw, 2.375rem);
+            color: #E5B25B;
+            margin-bottom: 1.25rem;
+        }
+
+        .menu {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .item {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .item button {
+            width: clamp(56px, 16vw, 70px);
+            height: clamp(56px, 16vw, 70px);
+            padding: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,.12);
+            border: 2px solid #D4A44D;
+            font-size: clamp(1.375rem, 6vw, 1.75rem);
+            color: #E6B35B;
+        }
+
+        .item p {
+            margin-top: 0.625rem;
+            font-size: clamp(0.8rem, 3vw, 0.9375rem);
+            color: white;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+                align-items: stretch;
+                scrollbar-width: none;
+            }
+
+            body::-webkit-scrollbar,
+            .phone::-webkit-scrollbar {
+                width: 0;
+                height: 0;
+                display: none;
+            }
+
+            .phone {
+                width: 100%;
+                min-height: 100dvh;
+                border-radius: 0;
+                scrollbar-width: none;
+            }
+
+            .gift {
+                padding: 1rem 0.75rem 1.25rem;
+            }
+
+            .pix-meta {
+                flex-direction: column;
+            }
+
+            .footer {
+                width: calc(100% - 1rem);
+                margin: 1.25rem auto 0.75rem;
+            }
+        }
+
+        @media (min-width: 700px) {
+            body {
+                padding: 40px;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .phone {
+                width: min(90vw, 760px);
+                max-width: 760px;
+                max-height: calc(100vh - 80px);
+                overflow-y: auto;
+                border-radius: 28px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .hero,
+            .gift,
+            .footer {
+                width: 100%;
+            }
+
+            .pix-panel,
+            .pix-meta {
+                width: min(100%, 560px);
+            }
+
+            .footer {
+                width: min(100%, 420px);
+                margin: 1.5rem auto 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="phone">
+        <section class="hero">
+            <h2>CASAMENTO</h2>
+            <h1>Carine &amp; Gerson</h1>
+            <div class="line"></div>
+            <p>
+                Estamos muito felizes em celebrar esse momento especial ao lado de vocês.
+                Sua presença já enche nosso coração, e se quiser nos ajudar a dar o próximo passo
+                com uma contribuição carinhosa, ficaremos imensamente gratos.
+            </p>
+            <div class="date">21 • 11 • 2026</div>
+        </section>
+
+        <section class="gift">
+            <div class="gift-intro">
+                <h3>Obrigado com amor</h3>
+                <p>
+                    Cada gesto de carinho faz parte dessa história que estamos escrevendo juntos.
+                    Se você quiser nos ajudar a começar essa nova etapa com muito amor, sua contribuição
+                    será um presente tão especial para nós.
+                </p>
+            </div>
+
+            <div class="pix-panel">
+                <div class="qr-wrap">
+                    <img
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=00020101021226840014BR.GOV.BCB.PIX2553pix.example.com5204000053039865802BR5913Carine%20e%20Gerson6007Tatui62070503***6304A1B2C"
+                        alt="QR Code do Pix"
+                    >
+                </div>
+
+                <div class="pix-code-box">
+                    <textarea id="pix-code" readonly>00020101021226840014BR.GOV.BCB.PIX2553pix.example.com5204000053039865802BR5913Carine e Gerson6007Tatui62070503***6304A1B2C</textarea>
+                    <button class="copy-btn" type="button" onclick="copyPixCode()">Copiar código</button>
+                </div>
+            </div>
+
+            <div class="pix-meta">
+                <div class="pix-meta-item">
+                    <span class="pix-meta-label">Nome</span>
+                    <div class="pix-meta-value">Carine &amp; Gerson</div>
+                </div>
+                <div class="pix-meta-item">
+                    <span class="pix-meta-label">Banco</span>
+                    <div class="pix-meta-value">Nubank</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="footer">
+            <h3>Informações</h3>
+
+            <div class="menu">
+                <div class="item">
+                    <button onclick="window.open('https://maps.app.goo.gl/bzwzCPo7FLfLqZzs9')" aria-label="Local">
+                        📍
+                    </button>
+                    <p>Espaço Maná - Tatui</p>
+                </div>
+
+                <div class="item">
+                    <button onclick="window.open('https://lista.mercadolivre.com.br')" aria-label="Presentes">
+                        🎁
+                    </button>
+                    <p>Presentes</p>
+                </div>
+
+                <div class="item">
+                    <button onclick="window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text=Casamento%20Carine%20%26%20Gerson&dates=20261121T000000Z/20261122T000000Z&details=Dia%20do%20casamento%20de%20Carine%20e%20Gerson.&location=Espa%C3%A7o%20Man%C3%A1%20-%20Tatu%C3%AD')" aria-label="Data">
+                        📅
+                    </button>
+                    <p>21•11•2026</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        async function copyPixCode() {
+            const pixCode = document.getElementById('pix-code');
+            const button = document.querySelector('.copy-btn');
+
+            try {
+                await navigator.clipboard.writeText(pixCode.value);
+                const originalText = button.textContent;
+                button.textContent = 'Código copiado!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 1500);
+            } catch (error) {
+                pixCode.focus();
+                pixCode.select();
+                document.execCommand('copy');
+            }
+        }
+    </script>
+</body>
+
+</html>
