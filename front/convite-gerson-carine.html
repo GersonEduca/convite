@@ -262,7 +262,7 @@
         flex-direction: column;
         justify-content: space-between;
         text-align: center;
-        overflow: hidden;
+        overflow: visible;
         box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
         transition: transform 0.18s ease;
       }
@@ -278,6 +278,18 @@
         flex-direction: column;
         justify-content: space-between;
         background: rgba(255, 255, 255, 0.08);
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .card-inner::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .card-inner::-webkit-scrollbar-thumb {
+        background: rgba(170, 124, 17, 0.5);
+        border-radius: 999px;
       }
 
       .corner {
@@ -363,9 +375,16 @@
         color: #475569;
         font-size: 0.68rem;
         letter-spacing: 0.09em;
-        text-transform: uppercase;
         font-weight: 600;
         line-height: 1.35;
+      }
+
+      .pais-carine-subtitle,
+      .pais-gerson-subtitle {
+        font-family: "Cormorant Garamond", serif;
+        font-style: italic;
+        font-weight: 700;
+        letter-spacing: 0.04em;
       }
 
       .names-wrap {
@@ -640,11 +659,15 @@
                 <p class="event-time">às 16h30</p>
                 <p class="event-location">Espaço Maná - Tatuí, SP</p>
               </div>
+                
 
+                <span class="corner bottom-left"></span>
+                <span class="corner bottom-right"></span>
               <div>
                 <p class="event-sentence">
                   “O amor não consiste em olhar um para o outro, mas em olhar juntos na mesma direção.”
                 </p>
+                
 
                 <div class="card-actions">
                   <button class="ghost-btn local-btn" type="button" onclick="window.open('https://maps.app.goo.gl/bzwzCPo7FLfLqZzs9')">Local</button>
@@ -652,8 +675,11 @@
                   <button class="ghost-btn presents-btn" type="button" onclick="window.location.href='{% url 'pix_contribution' %}'" aria-label="Presentes">Presentes</button>
                 </div>
               </div>
+              
             </div>
+            
           </div>
+          
 
           <div class="envelope-inner"></div>
 
