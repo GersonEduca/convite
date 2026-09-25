@@ -8,9 +8,14 @@ from django.views.decorators.http import require_GET, require_POST
 
 from .models import Guest
 
+def invitation(request, family_slug=None):
+    context = {'family_slug': family_slug}
+    if family_slug:
+        context['invite'] = get_object_or_404(Guest, slug=family_slug)
+    return render(request, 'convite-gerson-carine.html', context)
 
 @ensure_csrf_cookie
-def invitation(request, family_slug=None):
+def confirm(request, family_slug=None):
     context = {'family_slug': family_slug}
     if family_slug:
         context['family'] = get_object_or_404(Guest, slug=family_slug)
