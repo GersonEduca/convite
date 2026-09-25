@@ -53,8 +53,8 @@ class GuestAdmin(admin.ModelAdmin):
 
         return (
             '✨💍 Carine & Gerson 💍✨\n'
-            'Você faz parte da nossa história e não poderia ficar de fora desse dia tão especial! �✨\n\n'
-            'Venha celebrar o nosso casamento conosco, a sua presença é fundamental para tornar esse dia ainda mais especial! 🎉\n\n'
+            'Você faz parte da nossa história e não poderia ficar de fora desse dia tão especial! 👰‍♀️🤵‍♂️✨\n\n'
+            'Venha celebrar o nosso casamento conosco, a sua presença é fundamental para tornar esse dia ainda mais especial! 🥂\n\n'
             'Confirme sua presença pelo link:\n'
             f'{invite_url}\n\n'
         )
