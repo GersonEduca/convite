@@ -1,11 +1,17 @@
-from django.utils.text import slugify
-from openpyxl import load_workbook
+# -*- coding: utf-8 -*-
+
+import re
+from urllib.parse import quote
+
 from django import forms
+from django.conf import settings
 from django.contrib import admin, messages
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import path, reverse
+from django.utils.html import format_html
+from openpyxl import load_workbook
 
 from .models import Guest
 
@@ -16,10 +22,56 @@ class GuestImportForm(forms.Form):
 
 @admin.register(Guest)
 class GuestAdmin(admin.ModelAdmin):
-    list_display = ('name', 'family_head', 'phone', 'response')
+    list_display = ('name', 'family_head', 'phone', 'response', 'whatsapp_link')
     list_filter = ('response', 'family_head')
     search_fields = ('name', 'phone', 'notes')
     change_list_template = 'admin/guests/guest/change_list.html'
+
+    @staticmethod
+    def normalize_phone(phone):
+        digits = re.sub(r'\D', '', str(phone or ''))
+        if not digits:
+            return ''
+
+        if digits.startswith('55') and len(digits) == 13:
+            return digits
+        if digits.startswith('55') and len(digits) == 12:
+            return digits
+        if len(digits) == 11:
+            return f'55{digits}'
+        if len(digits) == 10:
+            return f'55{digits}'
+        return digits
+
+    def build_whatsapp_message(self, obj):
+        family = obj.family_head or obj
+        family_slug = family.slug if getattr(family, 'slug', None) else ''
+        base_url = settings.APP_BASE_URL.rstrip('/')
+
+        invite_url = f'{base_url}/{family_slug}' if family_slug else base_url
+        #image_url = f'{base_url}{settings.STATIC_URL}bg-top.png'
+
+        return (
+            '✨💍 Carine & Gerson 💍✨\n'
+            'Você faz parte da nossa história e não poderia ficar de fora desse dia tão especial! �✨\n\n'
+            'Venha celebrar o nosso casamento conosco, a sua presença é fundamental para tornar esse dia ainda mais especial! 🎉\n\n'
+            'Confirme sua presença pelo link:\n'
+            f'{invite_url}\n\n'
+        )
+
+    def whatsapp_link(self, obj):
+        phone = self.normalize_phone(obj.phone)
+        if not phone:
+            return '-' 
+
+        message = quote(self.build_whatsapp_message(obj))
+        url = f'https://wa.me/{phone}?text={message}'
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener" style="display:inline-block;padding:6px 12px;border-radius:6px;background:#25D366;color:#fff;text-decoration:none;font-weight:600;">WhatsApp</a>',
+            url,
+        )
+
+    whatsapp_link.short_description = 'WhatsApp'
 
     def get_urls(self):
         urls = super().get_urls()

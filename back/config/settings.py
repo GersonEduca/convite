@@ -9,6 +9,7 @@ env = environ.Env(
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
     CSRF_TRUSTED_ORIGINS=(list, []),
+    APP_BASE_URL=(str, 'dominio'),
     DB_NAME=(str, 'convite'),
     DB_USER=(str, 'convite'),
     DB_PASSWORD=(str, 'convite'),
@@ -21,6 +22,7 @@ environ.Env.read_env(BASE_DIR / '.env')
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-convite-local')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+APP_BASE_URL = env('APP_BASE_URL')
 
 # SSL / proxy
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

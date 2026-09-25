@@ -396,13 +396,6 @@
         letter-spacing: 0.04em;
       }
 
-      .pais-antenor-subtitle svg {
-        width: 0.9rem;
-        height: 0.9rem;
-        flex-shrink: 0;
-        fill: rgba(170, 124, 17, 0.9);
-      }
-
       .names-wrap {
         margin: 0.8rem 0 0.8rem;
         padding: 0 0.5rem;
@@ -691,6 +684,7 @@
                   <button class="ghost-btn local-btn" type="button" onclick="window.open('https://maps.app.goo.gl/bzwzCPo7FLfLqZzs9')">Local</button>
                   <button class="gold-btn confirm-btn" type="button" onclick="window.location.href = familySlug ? '/confirmar/' + familySlug + '/' : '{% url "pix_contribution" %}'" aria-label="Confirmar presença">Confirmar presença</button>
                   <button class="ghost-btn presents-btn" type="button" onclick="window.location.href='{% url 'pix_contribution' %}'" aria-label="Presentes">Presentes</button>
+                  <button class="ghost-btn presents-btn" type="button" onclick="window.location.href='{% url 'pix_contribution' %}'" aria-label="Manual dos Convidados">Manual dos convidados</button>
                 </div>
               </div>
               
