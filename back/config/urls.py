@@ -11,6 +11,7 @@ urlpatterns = [
     path('api/guests/', views.guests, name='guests'),
     path('api/guests/<int:guest_id>/respond/', views.respond, name='respond'),
     path('pix/', views.pix_contribution, name='pix_contribution'),
+    path('manual/', views.guest_manual, name='manual_convidados'),
     path('confirmar/<slug:family_slug>/', views.confirm, name='family_invitation'),
     path('<slug:family_slug>/', views.invitation, name='invite'),
 ]

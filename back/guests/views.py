@@ -27,6 +27,10 @@ def pix_contribution(request):
     return render(request, 'pix.html')
 
 
+def guest_manual(request):
+    return render(request, 'manual-convidados.html')
+
+
 @require_GET
 def guests(request):
     guests = Guest.objects.all().order_by('name')
