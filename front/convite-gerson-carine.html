@@ -271,7 +271,7 @@
         pointer-events: none;
       }
 
-      .invitation-card.is-actions-interactive .card-actions {
+      .invitation-card.is-actions-interactive {
         pointer-events: auto;
       }
 
@@ -845,9 +845,22 @@
         });
       }
 
+      card.addEventListener('click', (event) => {
+        if (event.target.closest('button, a, input, select, textarea')) return;
+        if (window.scrollY < document.documentElement.scrollHeight - window.innerHeight - 2) {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth'
+          });
+        }
+      });
+
       waxSeal.addEventListener('click', () => {
-        if (window.scrollY < 120) {
-          window.scrollTo({ top: window.innerHeight * 0.65, behavior: 'smooth' });
+        if (window.scrollY < document.documentElement.scrollHeight - window.innerHeight - 2) {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth'
+          });
         }
       });
 
