@@ -38,7 +38,7 @@ def guests(request):
     for guest in guests:
         item = {
             'id': guest.id,
-            'name': guest.name,
+            'name': guest.name.split("-")[0],
             'first_name': guest.first_name,
             'response': guest.response,
             'family_head_id': guest.family_head_id,
@@ -56,14 +56,14 @@ def family_guests(request, family_slug):
     for guest in members:
         payload_members.append({
             'id': guest.id,
-            'name': guest.name,
+            'name': guest.name.split("-")[0],
             'first_name': guest.first_name,
             'response': guest.response,
             'family_head_id': guest.family_head_id,
             'slug': guest.slug,
         })
     return JsonResponse({
-        'head': {'id': family_head.id, 'name': family_head.name, 'first_name': family_head.first_name},
+        'head': {'id': family_head.id, 'name': family_head.name.split("-")[0], 'first_name': family_head.first_name},
         'members': payload_members,
     })
 

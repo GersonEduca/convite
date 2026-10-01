@@ -8,7 +8,7 @@ class Guest(models.Model):
         CONFIRMED = 'confirmed', 'Confirmado'
         DECLINED = 'declined', 'Negado'
 
-    name = models.CharField('Nome', max_length=120)
+    name = models.CharField('Nome', max_length=120, unique=True)
     family_head = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
@@ -31,7 +31,7 @@ class Guest(models.Model):
     def first_name(self):
         if not self.name:
             return ''
-        return self.name.strip().split()[0]
+        return self.name.split('-', 1)[0].strip().split()[0]
 
     def generate_unique_slug(self, source_id=None):
         base_slug = slugify(self.name) or 'convidado'
