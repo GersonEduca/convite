@@ -852,30 +852,27 @@
       }
 
       function scrollToCard() {
+        openInvitationFully();
+      }
+
+      function openInvitationFully() {
+        const maxScroll = Math.max(
+          document.documentElement.scrollHeight,
+          document.body.scrollHeight
+        ) - window.innerHeight;
+
         window.scrollTo({
-          top: Math.min(window.innerHeight * 1.2, document.documentElement.scrollHeight * 0.9),
+          top: Math.max(maxScroll, 0),
           behavior: 'smooth'
         });
       }
 
       card.addEventListener('click', (event) => {
         if (event.target.closest('button, a, input, select, textarea')) return;
-        if (window.scrollY < document.documentElement.scrollHeight - window.innerHeight - 2) {
-          window.scrollTo({
-            top: document.documentElement.scrollHeight,
-            behavior: 'smooth'
-          });
-        }
+        openInvitationFully();
       });
 
-      waxSeal.addEventListener('click', () => {
-        if (window.scrollY < document.documentElement.scrollHeight - window.innerHeight - 2) {
-          window.scrollTo({
-            top: document.documentElement.scrollHeight,
-            behavior: 'smooth'
-          });
-        }
-      });
+      waxSeal.addEventListener('click', openInvitationFully);
 
       function showToast(message, iconClass = 'fa-circle-check') {
         const toast = document.getElementById('toast');
