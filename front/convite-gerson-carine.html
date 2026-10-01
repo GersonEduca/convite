@@ -271,6 +271,10 @@
         pointer-events: none;
       }
 
+      .invitation-card.is-actions-interactive .card-actions {
+        pointer-events: auto;
+      }
+
       .card-inner {
         position: relative;
         border: 1px solid rgba(156, 112, 30, 0.3);
@@ -822,8 +826,9 @@
         }
 
         card.style.transform = `translateY(${translateY}px) scale(${cardScale})`;
-        card.style.zIndex = progress > 0.65 ? '30' : '10';
+        card.style.zIndex = progress >= 0.65 ? '30' : '10';
         const cardIsOut = progress >= 0.85;
+        card.classList.toggle('is-actions-interactive', progress >= 0.65);
         card.classList.toggle('is-interactive', cardIsOut);
         envelope.style.width = wrapperWidth;
         envelope.style.height = wrapperHeight;
