@@ -23,12 +23,18 @@ def confirm(request, family_slug=None):
 
 
 @ensure_csrf_cookie
-def pix_contribution(request):
-    return render(request, 'pix.html')
+def pix_contribution(request, family_slug=None):
+    context = {'family_slug': family_slug}
+    if family_slug:
+        get_object_or_404(Guest, slug=family_slug)
+    return render(request, 'pix.html', context)
 
 
-def guest_manual(request):
-    return render(request, 'manual-convidados.html')
+def guest_manual(request, family_slug=None):
+    context = {'family_slug': family_slug}
+    if family_slug:
+        get_object_or_404(Guest, slug=family_slug)
+    return render(request, 'manual-convidados.html', context)
 
 
 @require_GET

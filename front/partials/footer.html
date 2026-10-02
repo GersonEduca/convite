@@ -93,10 +93,30 @@
         </div>
 
         <div class="item">
+            {% if footer_is_pix %}
+                {% if family_slug %}
+            <button onclick="window.location.href='{% url 'family_invitation' family_slug %}'" aria-label="Confirmar presença">
+                ✅
+            </button>
+            <p>Confirmar presença</p>
+                {% else %}
+            <button onclick="window.location.href='{% url 'manual_convidados' %}'" aria-label="Manual dos convidados">
+                📖
+            </button>
+            <p>Manual dos convidados</p>
+                {% endif %}
+            {% else %}
+                {% if family_slug %}
+            <button onclick="window.location.href='{% url 'family_pix' family_slug %}'" aria-label="Presentes">
+                🎁
+            </button>
+                {% else %}
             <button onclick="window.location.href='{% url 'pix_contribution' %}'" aria-label="Presentes">
                 🎁
             </button>
+                {% endif %}
             <p>Presentes</p>
+            {% endif %}
         </div>
 
         <div class="item">

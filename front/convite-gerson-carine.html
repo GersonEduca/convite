@@ -705,9 +705,13 @@
 
                 <div class="card-actions">
                   <button class="ghost-btn local-btn" type="button" onclick="window.open('https://maps.app.goo.gl/bzwzCPo7FLfLqZzs9')">Local</button>
-                  <button class="gold-btn confirm-btn" type="button" onclick="window.location.href = familySlug ? '/confirmar/' + familySlug + '/' : '{% url "pix_contribution" %}'" aria-label="Confirmar presença">Confirmar presença</button>
-                  <button class="ghost-btn presents-btn" type="button" onclick="window.location.href='{% url 'pix_contribution' %}'" aria-label="Presentes">Presentes</button>
-                  <button class="ghost-btn presents-btn" type="button" onclick="window.location.href='{% url 'manual_convidados' %}'" aria-label="Manual dos Convidados">Manual dos convidados</button>
+                  {% if family_slug %}
+                  <button class="gold-btn confirm-btn" type="button" onclick="window.location.href = '/confirmar/{{ family_slug }}/'" aria-label="Confirmar presença">Confirmar presença</button>
+                  {% endif %}
+                  <button class="ghost-btn presents-btn" type="button" onclick="window.location.href='{% if family_slug %}{% url 'family_pix' family_slug %}{% else %}{% url 'pix_contribution' %}{% endif %}'" aria-label="Presentes">Presentes</button>
+                  {% if family_slug %}
+                  <button class="ghost-btn presents-btn" type="button" onclick="window.location.href='{% url 'family_manual' family_slug %}'" aria-label="Manual dos Convidados">Manual dos convidados</button>
+                  {% endif %}
                 </div>
               </div>
               
