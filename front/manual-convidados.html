@@ -304,60 +304,6 @@
             transform: scale(1.05);
         }
 
-        /* ---------------------------------------------------------
-           RODAPÉ
-           --------------------------------------------------------- */
-        .footer {
-            background: url("/static/bg-top.png") center/cover no-repeat;
-            padding: clamp(1.25rem, 5vw, 1.75rem) clamp(1rem, 5vw, 1.25rem);
-            color: white;
-            text-align: center;
-            border-radius: 28px;
-            box-shadow: 0 20px 35px rgba(0, 0, 0, .22);
-            width: min(100%, 360px);
-            max-width: 360px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-            align-self: center;
-        }
-
-        .footer h3 {
-            font-family: "Great Vibes", cursive;
-            font-size: clamp(1.75rem, 7vw, 2.375rem);
-            color: #E5B25B;
-            margin-bottom: 1.25rem;
-        }
-
-        .menu {
-            display: flex;
-            justify-content: space-between;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .item {
-            flex: 1;
-            min-width: 80px;
-        }
-
-        .item button {
-            width: clamp(56px, 16vw, 70px);
-            height: clamp(56px, 16vw, 70px);
-            padding: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,.12);
-            border: 2px solid #D4A44D;
-            font-size: clamp(1.375rem, 6vw, 1.75rem);
-            color: #E6B35B;
-        }
-
-        .item p {
-            margin-top: 0.625rem;
-            font-size: clamp(0.8rem, 3vw, 0.9375rem);
-            color: white;
-        }
-
         /* =========================================================
            A PARTIR DE TABLETS/DESKTOP (>= 700px):
            mantemos a leitura confortável limitando a largura do
@@ -410,10 +356,6 @@
                 justify-content: flex-end;
             }
 
-            .footer {
-                width: calc(100% - 1rem);
-                margin: 0 auto 0.75rem;
-            }
         }
 
         /* ==========================================================
@@ -443,8 +385,7 @@
             }
 
             .hero,
-            .confirm,
-            .footer {
+            .confirm {
                 width: 100%;
             }
 
@@ -454,10 +395,6 @@
                 margin-right: auto;
             }
 
-            .footer {
-                width: min(100%, 420px);
-                margin: 0 auto;
-            }
         }
     </style>
 
@@ -563,36 +500,7 @@
 
         </section>
 
-        <section class="footer">
-
-            <h3>Informações</h3>
-
-            <div class="menu">
-
-                <div class="item">
-                    <button onclick="window.open('https://maps.app.goo.gl/bzwzCPo7FLfLqZzs9')" aria-label="Local">
-                        📍
-                    </button>
-                    <p>Espaço Maná - Tatui</p>
-                </div>
-
-                <div class="item">
-                    <button onclick="window.location.href='{% url 'pix_contribution' %}'" aria-label="Presentes">
-                        🎁
-                    </button>
-                    <p>Presentes</p>
-                </div>
-
-                <div class="item">
-                    <button onclick="window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text=Casamento%20Carine%20%26%20Gerson&dates=20261121T000000Z/20261122T000000Z&details=Dia%20do%20casamento%20de%20Carine%20e%20Gerson.&location=Espa%C3%A7o%20Man%C3%A1%20-%20Tatu%C3%AD')" aria-label="Data">
-                        📅
-                    </button>
-                    <p>21•11•2026</p>
-                </div>
-
-            </div>
-
-        </section>
+        {% include "partials/footer.html" with footer_compact=True %}
 
     </div>
 
