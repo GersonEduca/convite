@@ -52,10 +52,11 @@ class GuestAdmin(admin.ModelAdmin):
         #image_url = f'{base_url}{settings.STATIC_URL}bg-top.png'
 
         return (
-            '✨💍 Carine & Gerson 💍✨\n'
+            '✨💌 Você recebeu um convite! 💌 ✨\n\n'
             'Você faz parte da nossa história e não poderia ficar de fora desse dia tão especial! 👰‍♀️🤵‍♂️✨\n\n'
             'Venha celebrar o nosso casamento conosco, a sua presença é fundamental para tornar esse dia ainda mais especial! 🥂\n\n'
-            'Confirme sua presença pelo link:\n'
+            '✨💍 Carine & Gerson 💍✨\n\n'
+            '🗓️Confirme sua presença pelo link até dia 06/11/2026:\n'
             f'{invite_url}\n\n'
         )
 
