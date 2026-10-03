@@ -58,6 +58,10 @@
         color: white;
     }
 
+    .footer .item .footer-date {
+        color: #E5B25B;
+    }
+
     @media (max-width: 480px) {
         .footer {
             width: calc(100% - 1rem);
@@ -98,7 +102,7 @@
             <button onclick="window.location.href='{% url 'family_invitation' family_slug %}'" aria-label="Confirmar presença">
                 ✅
             </button>
-            <p>🗓️ 21•11•2026</p>
+            <p>Confirmar presença</p>
             {% else %}
                 {% if family_slug %}
             <button onclick="window.location.href='{% url 'family_pix' family_slug %}'" aria-label="Presentes">
@@ -110,6 +114,9 @@
             </button>
                 {% endif %}
             <p>Presentes</p>
+            {% endif %}
+            {% if family_slug or not footer_is_manual and not footer_is_pix %}
+            <p class="footer-date">🗓️ 21•11•2026</p>
             {% endif %}
         </div>
         {% endif %}
@@ -129,6 +136,7 @@
         </div>
         {% endif %}
 
+        {% if footer_is_manual or footer_is_pix and not family_slug %}
         <div class="item">
             {% if footer_is_manual and family_slug %}
             <button onclick="window.location.href='{% url 'family_invitation' family_slug %}'" aria-label="Confirmar presença">
@@ -141,8 +149,9 @@
             </button>
             <p>21•11•2026</p>
             {% else %}
-            <p>🗓️ 21•11•2026</p>
+            <p class="footer-date">🗓️ 21•11•2026</p>
             {% endif %}
         </div>
+        {% endif %}
     </div>
 </section>
