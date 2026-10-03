@@ -1,0 +1,19 @@
+<section class="hero">
+    <h2>{{ hero_title|default:"CASAMENTO" }}</h2>
+
+    <h1>{{ hero_name|default:"Carine & Gerson" }}</h1>
+
+    <div class="line"></div>
+
+    {% if hero_message %}
+    <p>
+        {{ hero_message }}
+    </p>
+    {% endif %}
+
+    {% if hero_date %}
+    <div class="date">
+        {{ hero_date }}
+    </div>
+    {% endif %}
+</section>
