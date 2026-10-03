@@ -1,6 +1,6 @@
 <style>
     .footer {
-        background: url("/static/bg-top.png") center/cover no-repeat;
+        background: url("/static/bg-top.png") center top / cover no-repeat;
         padding: clamp(1.25rem, 5vw, 1.75rem) clamp(1rem, 5vw, 1.25rem);
         color: white;
         text-align: center;
@@ -92,19 +92,13 @@
             <p>Espaço Maná - Tatui</p>
         </div>
 
+        {% if not footer_is_pix or family_slug %}
         <div class="item">
             {% if footer_is_pix %}
-                {% if family_slug %}
             <button onclick="window.location.href='{% url 'family_invitation' family_slug %}'" aria-label="Confirmar presença">
                 ✅
             </button>
-            <p>Confirmar presença</p>
-                {% else %}
-            <button onclick="window.location.href='{% url 'manual_convidados' %}'" aria-label="Manual dos convidados">
-                📖
-            </button>
-            <p>Manual dos convidados</p>
-                {% endif %}
+            <p>🗓️ 21•11•2026</p>
             {% else %}
                 {% if family_slug %}
             <button onclick="window.location.href='{% url 'family_pix' family_slug %}'" aria-label="Presentes">
@@ -118,12 +112,37 @@
             <p>Presentes</p>
             {% endif %}
         </div>
+        {% endif %}
+
+        {% if not footer_is_manual %}
+        <div class="item">
+            {% if family_slug %}
+            <button onclick="window.location.href='{% url 'family_manual' family_slug %}'" aria-label="Manual dos convidados">
+                📖
+            </button>
+            {% else %}
+            <button onclick="window.location.href='{% url 'manual_convidados' %}'" aria-label="Manual dos convidados">
+                📖
+            </button>
+            {% endif %}
+            <p>Manual dos convidados</p>
+        </div>
+        {% endif %}
 
         <div class="item">
+            {% if footer_is_manual and family_slug %}
+            <button onclick="window.location.href='{% url 'family_invitation' family_slug %}'" aria-label="Confirmar presença">
+                ✅
+            </button>
+            <p>Confirmar presença</p>
+            {% elif footer_is_manual or footer_is_pix and not family_slug %}
             <button onclick="window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text=Casamento%20Carine%20%26%20Gerson&dates=20261121T000000Z/20261122T000000Z&details=Dia%20do%20casamento%20de%20Carine%20e%20Gerson.&location=Espa%C3%A7o%20Man%C3%A1%20-%20Tatu%C3%AD')" aria-label="Data">
                 🗓️
             </button>
             <p>21•11•2026</p>
+            {% else %}
+            <p>🗓️ 21•11•2026</p>
+            {% endif %}
         </div>
     </div>
 </section>
