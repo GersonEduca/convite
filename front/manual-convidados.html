@@ -262,6 +262,27 @@
             flex: 1;
         }
 
+        .prohibited-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            width: fit-content;
+            max-width: 100%;
+            padding: 0.2rem 0.8rem;
+            border: 1px solid #d8b9a0;
+            border-radius: 999px;
+            background: #fffaf4;
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.5;
+            flex: 0 1 auto;
+        }
+
+        .prohibited-word {
+            color: #a52a2a;
+            font-weight: 500;
+        }
+
         .buttons {
             display: flex;
             flex-wrap: nowrap;
@@ -432,10 +453,10 @@
                     </div>
                     <div class="card manual-item">
                         <div class="name">👰 Branco é da noiva</div>
-                        <p>Pedimos que essa cor seja reservada para a noiva.</p>
+                        <p>Esta cor é exclusiva para a noiva, não deve ser usada por outras pessoas.</p>
                     </div>
                     <div class="card manual-item">
-                        <div class="name">🎨 Cores proibidas</div>
+                        <div class="name prohibited-title">🎨 <b>Cores</b> <span class="prohibited-word"><b>PROIBIDAS</b></span></div>
                         <div class="color-groups">
                             <div class="color-group">
                                 <h4>👗 Para moças</h4>
