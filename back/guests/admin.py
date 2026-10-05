@@ -7,7 +7,7 @@ from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.db import transaction
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import path, reverse
 from django.utils.html import format_html
@@ -23,7 +23,7 @@ class GuestImportForm(forms.Form):
 @admin.register(Guest)
 class GuestAdmin(admin.ModelAdmin):
     list_display = ('name', 'family_head', 'side_family', 'phone', 'response', 'whatsapp_link')
-    list_filter = ('response', 'family_head', 'side_family')
+    list_filter = ('response', 'send_status', 'family_head', 'side_family')
     search_fields = ('name', 'phone', 'notes')
     change_list_template = 'admin/guests/guest/change_list.html'
 
@@ -43,13 +43,21 @@ class GuestAdmin(admin.ModelAdmin):
             return f'55{digits}'
         return digits
 
-    def build_whatsapp_message(self, obj):
+    def build_whatsapp_message(self, obj, resend=False):
         family = obj.family_head or obj
         family_slug = family.slug if getattr(family, 'slug', None) else ''
         base_url = settings.APP_BASE_URL.rstrip('/')
 
         invite_url = f'{base_url}/{family_slug}' if family_slug else base_url
-        #image_url = f'{base_url}{settings.STATIC_URL}bg-top.png'
+
+        if resend:
+            return (
+                'Olá! Percebemos que você ainda não confirmou sua presença no nosso casamento.\n\n'
+                'Sua presença é muito importante para nós e vamos ficar muito felizes em celebrar com você!\n\n'
+                'Se puder, confirme sua presença até 06/11/2026 pelo link abaixo:\n'
+                f'{invite_url}\n\n'
+                'Com carinho, Carine & Gerson 💛'
+            )
 
         return (
             '✨💌 Você recebeu um convite! 💌 ✨\n\n'
@@ -60,26 +68,74 @@ class GuestAdmin(admin.ModelAdmin):
             f'{invite_url}\n\n'
         )
 
+    @admin.display(description='Status de envio')
     def whatsapp_link(self, obj):
+        if obj.response == Guest.Response.CONFIRMED:
+            return format_html(
+                '<button type="button" disabled style="display:inline-block;padding:6px 12px;border:0;border-radius:6px;background:#2878c7;color:#fff;font-weight:600;opacity:1;">Confirmado</button>'
+            )
+
+        if obj.send_status == Guest.SendStatus.RESENT:
+            return format_html(
+                '<button type="button" disabled style="display:inline-block;padding:6px 12px;border:0;border-radius:6px;background:#6c757d;color:#fff;font-weight:600;opacity:1;">Reenviado</button>'
+            )
+
         phone = self.normalize_phone(obj.phone)
         if not phone:
             return '-' 
 
-        message = quote(self.build_whatsapp_message(obj))
-        url = f'https://wa.me/{phone}?text={message}'
+        resend = obj.send_status == Guest.SendStatus.SENT and obj.response == Guest.Response.PENDING
+        label = Guest.SendStatus.RESEND.label if resend else obj.get_send_status_display()
+        background = '#f1c40f' if resend else '#25D366'
+        text_color = '#212529' if resend else '#fff'
         return format_html(
-            '<a href="{}" target="_blank" rel="noopener" style="display:inline-block;padding:6px 12px;border-radius:6px;background:#25D366;color:#fff;text-decoration:none;font-weight:600;">WhatsApp</a>',
-            url,
+            '<button type="button" class="guest-send-button" data-send-url="{}" data-resend="{}" style="display:inline-block;padding:6px 12px;border:0;border-radius:6px;background:{};color:{};text-decoration:none;font-weight:600;cursor:pointer;">{}</button>',
+            reverse('admin:guests_guest_send_whatsapp', args=[obj.pk]),
+            'true' if resend else 'false',
+            background,
+            text_color,
+            label,
         )
-
-    whatsapp_link.short_description = 'WhatsApp'
 
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
             path('import-xlsx/', self.admin_site.admin_view(self.import_xlsx_view), name='guests_guest_import_xlsx'),
+            path(
+                '<int:guest_id>/send-whatsapp/',
+                self.admin_site.admin_view(self.send_whatsapp_view),
+                name='guests_guest_send_whatsapp',
+            ),
         ]
         return custom_urls + urls
+
+    def send_whatsapp_view(self, request, guest_id):
+        if request.method != 'POST':
+            return JsonResponse({'error': 'Método não permitido.'}, status=405)
+
+        guest = self.get_object(request, str(guest_id))
+        if guest is None:
+            return JsonResponse({'error': 'Convidado não encontrado.'}, status=404)
+
+        phone = self.normalize_phone(guest.phone)
+        if not phone:
+            return JsonResponse({'error': 'O convidado não possui telefone cadastrado.'}, status=400)
+
+        resend = guest.send_status == Guest.SendStatus.SENT and guest.response == Guest.Response.PENDING
+        message = quote(self.build_whatsapp_message(guest, resend=resend))
+        guest.send_status = Guest.SendStatus.RESENT if resend else Guest.SendStatus.SENT
+        guest.save(update_fields=['send_status'])
+
+        button_label = (
+            Guest.SendStatus.RESEND.label
+            if guest.send_status == Guest.SendStatus.SENT and guest.response == Guest.Response.PENDING
+            else guest.get_send_status_display()
+        )
+        return JsonResponse({
+            'url': f'https://wa.me/{phone}?text={message}',
+            'button_label': button_label,
+            'resent': guest.send_status == Guest.SendStatus.RESENT,
+        })
 
     def import_xlsx_view(self, request):
         if request.method == 'POST':

@@ -3,6 +3,12 @@ from django.utils.text import slugify
 
 
 class Guest(models.Model):
+    class SendStatus(models.TextChoices):
+        TO_SEND = 'to_send', 'Enviar'
+        SENT = 'sent', 'Enviado'
+        RESEND = 'resend', 'Reenviar'
+        RESENT = 'resent', 'Reenviado'
+
     class SideFamily(models.TextChoices):
         NOIVO = 'noivo', 'Noivo'
         NOIVA = 'noiva', 'Noiva'
@@ -35,6 +41,12 @@ class Guest(models.Model):
         max_length=20,
         choices=Response.choices,
         default=Response.PENDING,
+    )
+    send_status = models.CharField(
+        'Status de envio',
+        max_length=10,
+        choices=SendStatus.choices,
+        default=SendStatus.TO_SEND,
     )
     slug = models.SlugField('Slug da família', max_length=120, unique=True, blank=True, null=True)
 

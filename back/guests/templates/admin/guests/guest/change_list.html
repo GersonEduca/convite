@@ -1,4 +1,49 @@
 {% extends "admin/change_list.html" %}
+{% block content %}
+    {{ block.super }}
+    <form hidden id="guest-send-csrf">{% csrf_token %}</form>
+    <script>
+        document.addEventListener('click', async (event) => {
+            const button = event.target.closest('.guest-send-button');
+            if (!button) return;
+
+            event.preventDefault();
+            const whatsappWindow = window.open('about:blank', '_blank');
+            if (!whatsappWindow) {
+                window.alert('Permita pop-ups para abrir o WhatsApp.');
+                return;
+            }
+            const csrfToken = document.querySelector('#guest-send-csrf [name=csrfmiddlewaretoken]').value;
+
+            try {
+                const response = await fetch(button.dataset.sendUrl, {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': csrfToken},
+                    credentials: 'same-origin',
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Não foi possível atualizar o status.');
+
+                whatsappWindow.location = result.url;
+                button.textContent = result.button_label;
+                if (result.resent) {
+                    button.disabled = true;
+                    button.classList.remove('guest-send-button');
+                    button.style.background = '#6c757d';
+                    button.style.color = '#fff';
+                    button.style.cursor = 'default';
+                } else if (result.button_label === 'Reenviar') {
+                    button.dataset.resend = 'true';
+                    button.style.background = '#f1c40f';
+                    button.style.color = '#212529';
+                }
+            } catch (error) {
+                whatsappWindow.close();
+                window.alert(error.message);
+            }
+        });
+    </script>
+{% endblock %}
 {% block object-tools-items %}
     {{ block.super }}
     <li>
