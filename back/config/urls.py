@@ -5,7 +5,7 @@ from guests import views
 
 
 urlpatterns = [
-    path('', views.pix_contribution, name='invitation'),
+    path('', views.guest_manual, name='invitation'),
     path('ademiro/', admin.site.urls),
     path('api/families/<slug:family_slug>/', views.family_guests, name='family_guests'),
     path('api/guests/', views.guests, name='guests'),
