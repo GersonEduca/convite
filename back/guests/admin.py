@@ -20,6 +20,36 @@ class GuestImportForm(forms.Form):
     file = forms.FileField(label='Arquivo Excel (.xlsx)')
 
 
+class SendStatusListFilter(admin.SimpleListFilter):
+    title = 'Status de envio'
+    parameter_name = 'send_status'
+
+    def lookups(self, request, model_admin):
+        return Guest.SendStatus.choices
+
+    def queryset(self, request, queryset):
+        status = self.value()
+        if not status:
+            return queryset
+
+        queryset = queryset.filter(phone__regex=r'\d').exclude(response=Guest.Response.CONFIRMED)
+        if status == Guest.SendStatus.TO_SEND:
+            return queryset.filter(send_status=Guest.SendStatus.TO_SEND)
+        if status == Guest.SendStatus.SENT:
+            return queryset.filter(
+                send_status=Guest.SendStatus.SENT,
+                response=Guest.Response.DECLINED,
+            )
+        if status == Guest.SendStatus.RESEND:
+            return queryset.filter(
+                send_status=Guest.SendStatus.SENT,
+                response=Guest.Response.PENDING,
+            )
+        if status == Guest.SendStatus.RESENT:
+            return queryset.filter(send_status=Guest.SendStatus.RESENT)
+        return queryset.none()
+
+
 @admin.register(Guest)
 class GuestAdmin(admin.ModelAdmin):
     list_display = (
@@ -31,7 +61,7 @@ class GuestAdmin(admin.ModelAdmin):
         'whatsapp_link',
         'confirmation_link',
     )
-    list_filter = ('response', 'send_status', 'family_head', 'side_family')
+    list_filter = ('response', SendStatusListFilter, 'family_head', 'side_family')
     search_fields = ('name', 'phone', 'notes')
     change_list_template = 'admin/guests/guest/change_list.html'
 
