@@ -90,11 +90,12 @@ class GuestAdmin(admin.ModelAdmin):
 
         if resend:
             return (
-                'Olá! Percebemos que você ainda não confirmou sua presença no nosso casamento.\n\n'
-                'Sua presença é muito importante para nós e vamos ficar muito felizes em celebrar com você!\n\n'
-                'Se puder, confirme sua presença até 06/11/2026 pelo link abaixo:\n'
+                'Oi! 💌 Passando para lembrar do nosso convite! ✨\n\n'
+                'Você faz parte da nossa história e sua presença é fundamental! 👰‍♀️🤵‍♂️💛\n\n'
+                'Vamos ficar muito felizes em celebrar esse momento com você! 🥂🎉\n\n'
+                'Se puder, confirme sua presença até 06/11/2026 pelo link abaixo: 🗓️\n'
                 f'{invite_url}\n\n'
-                'Com carinho, Carine & Gerson 💛'
+                'Com carinho, Carine & Gerson ✨💍💛'
             )
 
         return (
