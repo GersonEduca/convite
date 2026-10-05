@@ -22,7 +22,15 @@ class GuestImportForm(forms.Form):
 
 @admin.register(Guest)
 class GuestAdmin(admin.ModelAdmin):
-    list_display = ('name', 'family_head', 'side_family', 'phone', 'response', 'whatsapp_link')
+    list_display = (
+        'name',
+        'family_head',
+        'side_family',
+        'phone',
+        'response',
+        'whatsapp_link',
+        'confirmation_link',
+    )
     list_filter = ('response', 'send_status', 'family_head', 'side_family')
     search_fields = ('name', 'phone', 'notes')
     change_list_template = 'admin/guests/guest/change_list.html'
@@ -95,6 +103,18 @@ class GuestAdmin(admin.ModelAdmin):
             background,
             text_color,
             label,
+        )
+
+    @admin.display(description='Confirmação')
+    def confirmation_link(self, obj):
+        family = obj.family_head or obj
+        if not family.slug:
+            return '-'
+
+        url = reverse('family_invitation', args=[family.slug])
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener" style="display:inline-block;padding:6px 12px;border-radius:6px;background:#2878c7;color:#fff;text-decoration:none;font-weight:600;">Abrir confirmação</a>',
+            url,
         )
 
     def get_urls(self):
