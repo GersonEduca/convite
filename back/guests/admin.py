@@ -22,8 +22,8 @@ class GuestImportForm(forms.Form):
 
 @admin.register(Guest)
 class GuestAdmin(admin.ModelAdmin):
-    list_display = ('name', 'family_head', 'phone', 'response', 'whatsapp_link')
-    list_filter = ('response', 'family_head')
+    list_display = ('name', 'family_head', 'side_family', 'phone', 'response', 'whatsapp_link')
+    list_filter = ('response', 'family_head', 'side_family')
     search_fields = ('name', 'phone', 'notes')
     change_list_template = 'admin/guests/guest/change_list.html'
 
@@ -109,9 +109,13 @@ class GuestAdmin(admin.ModelAdmin):
                 index_chefe_id = header_index('Chefe_Id')
                 index_telefone = header_index('Telefone')
                 index_obs = header_index('Observação')
+                index_lado = header_index('Lado')
 
                 if index_name == -1:
                     messages.error(request, 'A coluna "Convidados" é obrigatória no arquivo XLSX.')
+                    return HttpResponseRedirect(reverse('admin:guests_guest_changelist'))
+                if index_lado == -1:
+                    messages.error(request, 'A coluna "Lado" é obrigatória no arquivo XLSX.')
                     return HttpResponseRedirect(reverse('admin:guests_guest_changelist'))
 
                 def normalize_name(value):
@@ -138,6 +142,18 @@ class GuestAdmin(admin.ModelAdmin):
                         return ''
                     value = row[index]
                     return '' if value is None else normalize_name(value)
+
+                side_values = {choice.value for choice in Guest.SideFamily}
+                for row_number, row in enumerate(rows[1:], start=2):
+                    if not row or not row_value(row, index_name):
+                        continue
+                    side = row_value(row, index_lado).casefold()
+                    if side not in side_values:
+                        messages.error(
+                            request,
+                            f'Valor inválido na coluna "Lado", linha {row_number}. Use "Noivo" ou "Noiva".',
+                        )
+                        return HttpResponseRedirect(reverse('admin:guests_guest_changelist'))
 
                 def find_or_create_guest(name, source_id=''):
                     normalized = normalize_name(name)
@@ -188,6 +204,7 @@ class GuestAdmin(admin.ModelAdmin):
                     guest = created_map[key]
                     guest.phone = row_value(row, index_telefone)
                     guest.notes = row_value(row, index_obs)
+                    guest.side_family = row_value(row, index_lado).casefold()
                     guest.family_head = None
                     if not guest.slug:
                         guest.slug = guest.generate_unique_slug(source_id=source_id)

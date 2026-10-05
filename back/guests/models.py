@@ -3,6 +3,10 @@ from django.utils.text import slugify
 
 
 class Guest(models.Model):
+    class SideFamily(models.TextChoices):
+        NOIVO = 'noivo', 'Noivo'
+        NOIVA = 'noiva', 'Noiva'
+
     class Response(models.TextChoices):
         PENDING = 'pending', 'Pendente'
         CONFIRMED = 'confirmed', 'Confirmado'
@@ -19,6 +23,13 @@ class Guest(models.Model):
     )
     phone = models.CharField('Telefone', max_length=30, blank=True, default='')
     notes = models.TextField('Observação', blank=True, default='')
+    side_family = models.CharField(
+        'Lado da família',
+        max_length=5,
+        choices=SideFamily.choices,
+        blank=True,
+        default='',
+    )
     response = models.CharField(
         'Resposta',
         max_length=20,
