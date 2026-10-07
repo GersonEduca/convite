@@ -380,7 +380,7 @@
 
                 return `
                     <div class="card" data-id="${guest.id}" data-response="${response}">
-                        <div class="name">${guest.first_name || guest.name}</div>
+                        <div class="name">${guest.name || guest.first_name}</div>
                         <div class="buttons">
                             <button class="ok" data-response="confirmed" ${isConfirmed ? 'disabled' : ''}>
                                 ${isConfirmed ? '✔ Confirmado' : '✔ Confirmar'}

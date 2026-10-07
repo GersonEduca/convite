@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 from django.utils.text import slugify
 
@@ -49,6 +51,12 @@ class Guest(models.Model):
         default=SendStatus.TO_SEND,
     )
     slug = models.SlugField('Slug da família', max_length=120, unique=True, blank=True, null=True)
+
+    @property
+    def display_name(self):
+        if not self.name:
+            return ''
+        return re.sub(r'-\s*\d+\s*$', '', self.name).strip()
 
     @property
     def first_name(self):
