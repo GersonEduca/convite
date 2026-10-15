@@ -1,4 +1,5 @@
 import re
+import uuid
 
 from django.db import models
 from django.utils.text import slugify
@@ -98,3 +99,24 @@ class Guest(models.Model):
 
     def __str__(self):
         return self.name
+
+
+def wedding_photo_upload_path(instance, filename):
+    suffix = filename.rsplit('.', 1)[-1].lower()
+    return f'wedding-photos/{uuid.uuid4().hex}.{suffix}'
+
+
+class WeddingPhoto(models.Model):
+    image = models.FileField('Imagem', upload_to=wedding_photo_upload_path)
+    delete_token = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField('Enviada em', auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at', '-id']
+
+    def delete(self, *args, **kwargs):
+        self.image.delete(save=False)
+        super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return f'Foto {self.pk}'

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Fotos do casamento | Carine & Gerson</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cormorant+Garamond:wght@500;700&family=Great+Vibes&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            margin: 0;
+            padding: clamp(0.75rem, 2.5vw, 1.25rem);
+            background: #f7f0e3;
+            font-family: Poppins, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #b8892f #f5ebd9;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .phone {
+            width: min(100%, 560px);
+            margin: 0 auto;
+            background: white;
+            overflow-x: hidden;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-radius: 24px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+        }
+
+        .gallery {
+            flex: 1 1 auto;
+            padding: clamp(1.25rem, 5vw, 2rem) clamp(0.95rem, 4vw, 1.4rem) clamp(1.25rem, 5vw, 1.75rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gallery-intro {
+            max-width: 520px;
+            margin-bottom: 1.2rem;
+            text-align: center;
+        }
+
+        .gallery-intro h1 {
+            margin-bottom: 0.45rem;
+            color: #B58A43;
+            font-family: "Cormorant Garamond", serif;
+            font-size: clamp(1.8rem, 7vw, 2.7rem);
+            font-weight: 700;
+        }
+
+        .gallery-intro p {
+            color: #4d4d4d;
+            font-size: 0.95rem;
+            line-height: 1.65;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.65rem;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .file-picker {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0.65rem 1rem;
+            overflow: hidden;
+            border: 1px solid #d7b466;
+            border-radius: 12px;
+            background: #fffdf9;
+            color: #57431f;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+
+        .file-picker input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+
+        .upload-button,
+        .delete-button {
+            min-height: 44px;
+            border: 0;
+            border-radius: 12px;
+            padding: 0.7rem 1.1rem;
+            background: #0C2D67;
+            color: white;
+            font: 600 0.88rem Poppins, sans-serif;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .upload-button:hover,
+        .delete-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .upload-button:disabled,
+        .delete-button:disabled {
+            opacity: 0.55;
+            cursor: wait;
+            transform: none;
+        }
+
+        .gallery-panel {
+            width: min(100%, 460px);
+            padding: clamp(0.7rem, 3vw, 1rem);
+            border: 2px solid #c99841;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #fffdf8 0%, #f9efe0 100%);
+            box-shadow: 0 10px 24px rgba(181, 138, 67, 0.12);
+        }
+
+        .carousel {
+            display: grid;
+            grid-template-columns: 44px minmax(0, 1fr) 44px;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .photo-stage {
+            position: relative;
+            display: grid;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            place-items: center;
+            overflow: hidden;
+            border: 1px solid #e7d4a4;
+            border-radius: 14px;
+            background: #f1e9dc;
+        }
+
+        .photo-stage img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .empty-message {
+            max-width: 260px;
+            padding: 1rem;
+            color: #74664f;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .arrow-button {
+            display: grid;
+            width: 40px;
+            height: 44px;
+            place-items: center;
+            border: 1px solid #d7b466;
+            border-radius: 12px;
+            background: #fffaf0;
+            color: #654b1d;
+            cursor: pointer;
+        }
+
+        .arrow-button:disabled {
+            opacity: 0.38;
+            cursor: default;
+        }
+
+        .arrow-button svg {
+            width: 21px;
+            height: 21px;
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 2;
+        }
+
+        .photo-caption {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            min-height: 1.35rem;
+            margin-top: 0.55rem;
+            color: #725b31;
+            font-size: 0.78rem;
+        }
+
+        .delete-button {
+            display: block;
+            min-width: 110px;
+            margin: 0.75rem auto 0;
+            background: #8c332c;
+        }
+
+        .delete-button[hidden] {
+            display: none;
+        }
+
+        .gallery-status {
+            min-height: 1.5rem;
+            margin-top: 0.8rem;
+            color: #57431f;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .phone {
+                width: 100%;
+                min-height: 100dvh;
+                border-radius: 0;
+            }
+
+            .gallery {
+                padding: 1rem 0.75rem 1.25rem;
+            }
+
+            .carousel {
+                grid-template-columns: 38px minmax(0, 1fr) 38px;
+                gap: 0.25rem;
+            }
+
+            .arrow-button {
+                width: 36px;
+            }
+        }
+
+        @media (min-width: 700px) {
+            body {
+                padding: 40px;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .phone {
+                width: min(90vw, 760px);
+                max-width: 760px;
+                max-height: calc(100vh - 80px);
+                border-radius: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="phone">
+        {% include "partials/hero.html" with hero_title="CASAMENTO" hero_name="Carine & Gerson" hero_message="Um lugar para compartilhar as lembranças que estamos criando juntos. Envie suas fotos e veja os registros de todos os convidados." hero_date="21 • 11 • 2026 às 16h30" %}
+
+        <main class="gallery">
+            <header class="gallery-intro">
+                <h1>Nossas lembranças</h1>
+                <p>Envie suas fotos para compartilhar com todos.</p>
+            </header>
+
+            <form class="upload-form" id="upload-form">
+                <label class="file-picker">
+                    <span id="file-label">Escolher fotos</span>
+                    <input id="photo-input" type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple>
+                </label>
+                <button class="upload-button" id="upload-button" type="submit">Enviar fotos</button>
+            </form>
+
+            <section class="gallery-panel" aria-label="Fotos compartilhadas">
+                <div class="carousel">
+                    <button class="arrow-button" id="previous-button" type="button" aria-label="Foto anterior" title="Foto anterior">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                    </button>
+                    <div class="photo-stage" id="photo-stage" aria-live="polite">
+                        <p class="empty-message">As fotos enviadas pelos convidados aparecerão aqui.</p>
+                    </div>
+                    <button class="arrow-button" id="next-button" type="button" aria-label="Próxima foto" title="Próxima foto">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                    </button>
+                </div>
+                <div class="photo-caption">
+                    <span id="photo-counter">Nenhuma foto</span>
+                    <span>Atualização automática</span>
+                </div>
+                <button class="delete-button" id="delete-button" type="button" hidden>Excluir</button>
+            </section>
+            <p class="gallery-status" id="gallery-status" role="status" aria-live="polite"></p>
+        </main>
+
+        {% include "partials/footer.html" with footer_is_pix=True %}
+    </div>
+
+    <script>
+        const photosApi = '/api/fotos/';
+        const photoInput = document.getElementById('photo-input');
+        const uploadForm = document.getElementById('upload-form');
+        const uploadButton = document.getElementById('upload-button');
+        const fileLabel = document.getElementById('file-label');
+        const photoStage = document.getElementById('photo-stage');
+        const photoCounter = document.getElementById('photo-counter');
+        const galleryStatus = document.getElementById('gallery-status');
+        const deleteButton = document.getElementById('delete-button');
+        const previousButton = document.getElementById('previous-button');
+        const nextButton = document.getElementById('next-button');
+        const deleteTokens = new Map();
+        let photos = [];
+        let selectedIndex = 0;
+
+        function csrfToken() {
+            const cookie = document.cookie.split('; ').find((item) => item.startsWith('csrftoken='));
+            return cookie ? decodeURIComponent(cookie.split('=').slice(1).join('=')) : '';
+        }
+
+        function showStatus(message) {
+            galleryStatus.textContent = message;
+        }
+
+        function renderGallery() {
+            if (photos.length === 0) {
+                photoStage.replaceChildren();
+                const emptyMessage = document.createElement('p');
+                emptyMessage.className = 'empty-message';
+                emptyMessage.textContent = 'As fotos enviadas pelos convidados aparecerão aqui.';
+                photoStage.append(emptyMessage);
+                photoCounter.textContent = 'Nenhuma foto';
+                deleteButton.hidden = true;
+                previousButton.disabled = true;
+                nextButton.disabled = true;
+                return;
+            }
+
+            selectedIndex = (selectedIndex + photos.length) % photos.length;
+            const photo = photos[selectedIndex];
+            const image = document.createElement('img');
+            image.src = photo.url;
+            image.alt = `Foto ${selectedIndex + 1} de ${photos.length} do casamento`;
+            photoStage.replaceChildren(image);
+            photoCounter.textContent = `${selectedIndex + 1} de ${photos.length}`;
+            deleteButton.hidden = !deleteTokens.has(photo.id);
+            previousButton.disabled = photos.length < 2;
+            nextButton.disabled = photos.length < 2;
+        }
+
+        async function refreshPhotos() {
+            try {
+                const response = await fetch(photosApi, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Não foi possível carregar as fotos.');
+                const updatedPhotos = await response.json();
+                const currentId = photos[selectedIndex]?.id;
+                photos = updatedPhotos;
+                const preservedIndex = photos.findIndex((photo) => photo.id === currentId);
+                selectedIndex = preservedIndex >= 0 ? preservedIndex : Math.min(selectedIndex, photos.length - 1);
+                renderGallery();
+            } catch (error) {
+                showStatus(error.message);
+            }
+        }
+
+        photoInput.addEventListener('change', () => {
+            const count = photoInput.files.length;
+            fileLabel.textContent = count ? `${count} foto${count === 1 ? '' : 's'} selecionada${count === 1 ? '' : 's'}` : 'Escolher fotos';
+        });
+
+        uploadForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const files = [...photoInput.files];
+            if (!files.length) {
+                showStatus('Escolha pelo menos uma foto para enviar.');
+                return;
+            }
+
+            uploadButton.disabled = true;
+            showStatus('Enviando fotos...');
+            try {
+                for (const file of files) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    const response = await fetch(`${photosApi}upload/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrfToken() },
+                        body: formData,
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || 'Não foi possível enviar a foto.');
+                    deleteTokens.set(result.id, result.delete_token);
+                    selectedIndex = 0;
+                }
+                photoInput.value = '';
+                fileLabel.textContent = 'Escolher fotos';
+                showStatus(`${files.length} foto${files.length === 1 ? '' : 's'} enviada${files.length === 1 ? '' : 's'} com sucesso.`);
+                await refreshPhotos();
+            } catch (error) {
+                showStatus(error.message);
+                await refreshPhotos();
+            } finally {
+                uploadButton.disabled = false;
+            }
+        });
+
+        async function changePhoto(direction) {
+            if (photos.length < 2) return;
+            selectedIndex = (selectedIndex + direction + photos.length) % photos.length;
+            renderGallery();
+        }
+
+        previousButton.addEventListener('click', () => changePhoto(-1));
+        nextButton.addEventListener('click', () => changePhoto(1));
+
+        deleteButton.addEventListener('click', async () => {
+            const photo = photos[selectedIndex];
+            const token = photo && deleteTokens.get(photo.id);
+            if (!photo || !token) return;
+
+            deleteButton.disabled = true;
+            try {
+                const response = await fetch(`${photosApi}${photo.id}/excluir/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken(),
+                    },
+                    body: JSON.stringify({ delete_token: token }),
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Não foi possível excluir a foto.');
+                deleteTokens.delete(photo.id);
+                showStatus('Foto excluída.');
+                await refreshPhotos();
+            } catch (error) {
+                showStatus(error.message);
+            } finally {
+                deleteButton.disabled = false;
+            }
+        });
+
+        refreshPhotos();
+        window.setInterval(refreshPhotos, 15000);
+    </script>
+</body>
+
+</html>

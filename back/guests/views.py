@@ -1,4 +1,6 @@
 import json
+import secrets
+from pathlib import Path
 
 from django.db.models import Q
 from django.http import JsonResponse
@@ -6,7 +8,21 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 
-from .models import Guest
+from .models import Guest, WeddingPhoto
+
+MAX_PHOTO_SIZE = 10 * 1024 * 1024
+ALLOWED_PHOTO_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+
+
+def is_supported_image(image):
+    header = image.read(12)
+    image.seek(0)
+    return (
+        header.startswith(b'\xff\xd8\xff')
+        or header.startswith(b'\x89PNG\r\n\x1a\n')
+        or header.startswith((b'GIF87a', b'GIF89a'))
+        or (header.startswith(b'RIFF') and header[8:12] == b'WEBP')
+    )
 
 def invitation(request, family_slug=None):
     context = {'family_slug': family_slug}
@@ -35,6 +51,56 @@ def guest_manual(request, family_slug=None):
     if family_slug:
         get_object_or_404(Guest, slug=family_slug)
     return render(request, 'manual-convidados.html', context)
+
+
+@ensure_csrf_cookie
+def wedding_photos(request):
+    return render(request, 'fotos.html')
+
+
+@require_GET
+def wedding_photo_list(request):
+    photos = WeddingPhoto.objects.all()
+    return JsonResponse([
+        {'id': photo.id, 'url': request.build_absolute_uri(photo.image.url)}
+        for photo in photos
+    ], safe=False)
+
+
+@require_POST
+def wedding_photo_upload(request):
+    image = request.FILES.get('image')
+    if image is None:
+        return JsonResponse({'error': 'Selecione uma imagem.'}, status=400)
+    if Path(image.name).suffix.lower() not in ALLOWED_PHOTO_EXTENSIONS:
+        return JsonResponse({'error': 'Formato de imagem nao permitido.'}, status=400)
+    if not is_supported_image(image):
+        return JsonResponse({'error': 'O arquivo enviado nao e uma imagem valida.'}, status=400)
+    if image.size > MAX_PHOTO_SIZE:
+        return JsonResponse({'error': 'A imagem deve ter no maximo 10 MB.'}, status=400)
+
+    photo = WeddingPhoto.objects.create(image=image)
+    return JsonResponse({
+        'id': photo.id,
+        'url': request.build_absolute_uri(photo.image.url),
+        'delete_token': str(photo.delete_token),
+    }, status=201)
+
+
+@require_POST
+def wedding_photo_delete(request, photo_id):
+    try:
+        payload = json.loads(request.body)
+        delete_token = payload['delete_token']
+    except (KeyError, json.JSONDecodeError, TypeError):
+        return JsonResponse({'error': 'Nao foi possivel excluir esta imagem.'}, status=400)
+
+    photo = get_object_or_404(WeddingPhoto, pk=photo_id)
+    if not secrets.compare_digest(str(photo.delete_token), str(delete_token)):
+        return JsonResponse({'error': 'Nao foi possivel excluir esta imagem.'}, status=403)
+
+    photo.delete()
+    return JsonResponse({'deleted': True})
 
 
 @require_GET

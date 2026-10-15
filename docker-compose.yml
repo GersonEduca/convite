@@ -31,6 +31,8 @@ services:
       - db
     ports:
       - "8000:8000"
+    volumes:
+      - wedding_photos:/app/back/media
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
@@ -38,3 +40,4 @@ services:
 
 volumes:
   postgres_data:
+  wedding_photos:
