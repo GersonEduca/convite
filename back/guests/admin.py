@@ -13,7 +13,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html
 from openpyxl import load_workbook
 
-from .models import Guest
+from .models import Guest, WeddingPhoto
 
 
 class GuestImportForm(forms.Form):
@@ -360,3 +360,46 @@ class GuestAdmin(admin.ModelAdmin):
             'title': 'Importar convidados via XLSX',
         }
         return render(request, 'admin/guests/guest/import_xlsx.html', context)
+
+
+@admin.register(WeddingPhoto)
+class WeddingPhotoAdmin(admin.ModelAdmin):
+    list_display = ('thumbnail', 'id', 'created_at')
+    list_display_links = ('thumbnail', 'id')
+    list_filter = ('created_at',)
+    date_hierarchy = 'created_at'
+    readonly_fields = ('preview', 'delete_token', 'created_at')
+    fields = ('image', 'preview', 'created_at', 'delete_token')
+    ordering = ('-created_at', '-id')
+    list_per_page = 30
+
+    @admin.display(description='Prévia')
+    def thumbnail(self, obj):
+        if not obj.image:
+            return '-'
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener">'
+            '<img src="{}" alt="Foto {}" style="width:96px;height:72px;object-fit:cover;border-radius:4px;">'
+            '</a>',
+            obj.image.url,
+            obj.image.url,
+            obj.pk,
+        )
+
+    @admin.display(description='Visualização')
+    def preview(self, obj):
+        if not obj or not obj.image:
+            return 'Salve a foto para visualizar.'
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener">'
+            '<img src="{}" alt="Foto {}" style="max-width:100%;max-height:70vh;object-fit:contain;">'
+            '</a>',
+            obj.image.url,
+            obj.image.url,
+            obj.pk,
+        )
+
+    def delete_queryset(self, request, queryset):
+        for photo in queryset:
+            photo.image.delete(save=False)
+        queryset.delete()
