@@ -12,6 +12,16 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cormorant+Garamond:wght@500;700&family=Great+Vibes&display=swap"
         rel="stylesheet">
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.0/dist/sweetalert2.min.css"
+        integrity="sha384-lERBHZiyM7LksowAbQR0Ed7t6xe6amEYkLVPjlLJGWVuBVu8bANFvmOr+3XaFduk"
+        crossorigin="anonymous">
+    <script
+        src="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.0/dist/sweetalert2.min.js"
+        integrity="sha384-kShQljzsVyNEiM1kggH4KnNCvXUgpOi8odYRnCzUEIH6FmfYJN2iinfzWEMy5wXH"
+        crossorigin="anonymous"
+        defer></script>
 
     <style>
         * {
@@ -113,7 +123,8 @@
         }
 
         .upload-button,
-        .delete-button {
+        .delete-button,
+        .download-button {
             min-height: 44px;
             border: 0;
             border-radius: 12px;
@@ -126,7 +137,8 @@
         }
 
         .upload-button:hover,
-        .delete-button:hover {
+        .delete-button:hover,
+        .download-button:hover {
             transform: translateY(-1px);
         }
 
@@ -135,6 +147,11 @@
             opacity: 0.55;
             cursor: wait;
             transform: none;
+        }
+
+        .upload-button:disabled {
+            opacity: 0.42;
+            cursor: not-allowed;
         }
 
         .gallery-panel {
@@ -219,11 +236,25 @@
             font-size: 0.78rem;
         }
 
-        .delete-button {
-            display: block;
-            min-width: 110px;
+        .photo-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.6rem;
             margin: 0.75rem auto 0;
+        }
+
+        .delete-button,
+        .download-button {
+            min-width: 110px;
+        }
+
+        .delete-button {
             background: #8c332c;
+        }
+
+        .download-button {
+            background: #0C2D67;
         }
 
         .delete-button[hidden] {
@@ -402,7 +433,7 @@
                     <span id="file-label">Escolher fotos</span>
                     <input id="photo-input" type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple>
                 </label>
-                <button class="upload-button" id="upload-button" type="submit">Enviar fotos</button>
+                <button class="upload-button" id="upload-button" type="submit" disabled>Enviar fotos</button>
             </form>
 
             <section class="gallery-panel" aria-label="Fotos compartilhadas">
@@ -421,7 +452,10 @@
                     <span id="photo-counter">Nenhuma foto</span>
                     <span>Atualização automática</span>
                 </div>
-                <button class="delete-button" id="delete-button" type="button" hidden>Excluir</button>
+                <div class="photo-actions">
+                    <button class="delete-button" id="delete-button" type="button" hidden>Excluir</button>
+                    <button class="download-button" id="download-button" type="button">Baixar</button>
+                </div>
             </section>
             <output class="gallery-status" id="gallery-status" aria-live="polite"></output>
         </main>
@@ -456,6 +490,7 @@
         const deleteButton = document.getElementById('delete-button');
         const previousButton = document.getElementById('previous-button');
         const nextButton = document.getElementById('next-button');
+        const downloadButton = document.getElementById('download-button');
         const lightbox = document.getElementById('lightbox');
         const lightboxImageWrap = document.getElementById('lightbox-image-wrap');
         const lightboxCounter = document.getElementById('lightbox-counter');
@@ -464,6 +499,7 @@
         const deleteTokens = new Map();
         let photos = [];
         let selectedIndex = 0;
+        let allowExitOnce = false;
 
         function csrfToken() {
             const cookie = document.cookie.split('; ').find((item) => item.startsWith('csrftoken='));
@@ -472,6 +508,19 @@
 
         function showStatus(message) {
             galleryStatus.textContent = message;
+        }
+
+        function hasPendingPhotos() {
+            return photoInput.files.length > 0;
+        }
+
+        function updateUploadState() {
+            const count = photoInput.files.length;
+            const plural = count === 1 ? '' : 's';
+            uploadButton.disabled = count === 0;
+            fileLabel.textContent = count
+                ? `${count} foto${plural} selecionada${plural}`
+                : 'Escolher fotos';
         }
 
         function renderGallery() {
@@ -483,6 +532,7 @@
                 photoStage.append(emptyMessage);
                 photoCounter.textContent = 'Nenhuma foto';
                 deleteButton.hidden = true;
+                downloadButton.disabled = true;
                 previousButton.disabled = true;
                 nextButton.disabled = true;
                 if (lightbox.open) lightbox.close();
@@ -501,6 +551,7 @@
             photoStage.replaceChildren(image);
             photoCounter.textContent = `${selectedIndex + 1} de ${photos.length}`;
             deleteButton.hidden = !deleteTokens.has(photo.id);
+            downloadButton.disabled = false;
             previousButton.disabled = photos.length < 2;
             nextButton.disabled = photos.length < 2;
             renderLightboxPhoto();
@@ -534,8 +585,7 @@
         }
 
         photoInput.addEventListener('change', () => {
-            const count = photoInput.files.length;
-            fileLabel.textContent = count ? `${count} foto${count === 1 ? '' : 's'} selecionada${count === 1 ? '' : 's'}` : 'Escolher fotos';
+            updateUploadState();
         });
 
         uploadForm.addEventListener('submit', async (event) => {
@@ -563,14 +613,14 @@
                     selectedIndex = 0;
                 }
                 photoInput.value = '';
-                fileLabel.textContent = 'Escolher fotos';
+                updateUploadState();
                 showStatus(`${files.length} foto${files.length === 1 ? '' : 's'} enviada${files.length === 1 ? '' : 's'} com sucesso.`);
                 await refreshPhotos();
             } catch (error) {
                 showStatus(error.message);
                 await refreshPhotos();
             } finally {
-                uploadButton.disabled = false;
+                updateUploadState();
             }
         });
 
@@ -580,10 +630,37 @@
             renderGallery();
         }
 
+        async function confirmLeaving() {
+            if (!hasPendingPhotos()) return true;
+
+            const result = await window.Swal.fire({
+                text: 'Você tem fotos não enviadas, deseja sair mesmo assim?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sair',
+                cancelButtonText: 'Continuar enviando',
+                confirmButtonColor: '#8c332c',
+                cancelButtonColor: '#0C2D67',
+            });
+            return result.isConfirmed;
+        }
+
         previousButton.addEventListener('click', () => changePhoto(-1));
         nextButton.addEventListener('click', () => changePhoto(1));
         lightboxPrevious.addEventListener('click', () => changePhoto(-1));
         lightboxNext.addEventListener('click', () => changePhoto(1));
+        downloadButton.addEventListener('click', () => {
+            const photo = photos[selectedIndex];
+            if (!photo) return;
+
+            const link = document.createElement('a');
+            link.href = photo.url;
+            const extension = new URL(photo.url).pathname.match(/\.[a-z0-9]+$/i)?.[0] || '.jpg';
+            link.download = `foto-casamento-${photo.id}${extension}`;
+            document.body.append(link);
+            link.click();
+            link.remove();
+        });
         document.getElementById('lightbox-close').addEventListener('click', () => lightbox.close());
         lightbox.addEventListener('click', (event) => {
             if (event.target === lightbox) lightbox.close();
@@ -592,6 +669,34 @@
             if (!lightbox.open) return;
             if (event.key === 'ArrowLeft') changePhoto(-1);
             if (event.key === 'ArrowRight') changePhoto(1);
+        });
+
+        document.addEventListener('click', async (event) => {
+            const link = event.target.closest('a[href]');
+            if (!link || !hasPendingPhotos() || link.target === '_blank' || event.defaultPrevented) return;
+            if (new URL(link.href, location.href).origin !== location.origin) return;
+
+            event.preventDefault();
+            if (await confirmLeaving()) {
+                allowExitOnce = true;
+                location.assign(link.href);
+            }
+        });
+
+        history.pushState({ photoPageGuard: true }, '', location.href);
+        window.addEventListener('popstate', async () => {
+            if (allowExitOnce || !hasPendingPhotos()) return;
+            if (await confirmLeaving()) {
+                allowExitOnce = true;
+                return;
+            }
+            history.pushState({ photoPageGuard: true }, '', location.href);
+        });
+
+        window.addEventListener('beforeunload', (event) => {
+            if (!hasPendingPhotos() || allowExitOnce) return;
+            event.preventDefault();
+            event.returnValue = '';
         });
 
         deleteButton.addEventListener('click', async () => {
