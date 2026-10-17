@@ -119,7 +119,7 @@
             border-radius: 12px;
             padding: 0.7rem 1.1rem;
             background: #0C2D67;
-            color: white;
+            color: #ffffff;
             font: 600 0.88rem Poppins, sans-serif;
             cursor: pointer;
             transition: opacity 0.2s ease, transform 0.2s ease;
@@ -157,7 +157,7 @@
             position: relative;
             display: grid;
             width: 100%;
-            aspect-ratio: 4 / 3;
+            height: clamp(390px, 62vh, 560px);
             place-items: center;
             overflow: hidden;
             border: 1px solid #e7d4a4;
@@ -170,6 +170,7 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+            cursor: zoom-in;
         }
 
         .empty-message {
@@ -237,6 +238,94 @@
             text-align: center;
         }
 
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+            max-height: 100%;
+            margin: 0;
+            padding: clamp(0.75rem, 3vw, 1.5rem);
+            border: 0;
+            background: #171714;
+            color: white;
+            overflow: hidden;
+        }
+
+        .lightbox[open] {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .lightbox::backdrop {
+            background: rgba(0, 0, 0, 0.88);
+        }
+
+        .lightbox-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            flex: 0 0 auto;
+        }
+
+        .lightbox-close {
+            display: grid;
+            width: 44px;
+            height: 44px;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 50%;
+            background: transparent;
+            color: white;
+            font: 400 1.8rem Poppins, sans-serif;
+            cursor: pointer;
+        }
+
+        .lightbox-content {
+            display: grid;
+            flex: 1 1 auto;
+            min-height: 0;
+            min-width: 0;
+            grid-template-columns: 48px minmax(0, 1fr) 48px;
+            align-items: center;
+            gap: clamp(0.4rem, 2vw, 1rem);
+        }
+
+        .lightbox-image-wrap {
+            display: grid;
+            width: 100%;
+            height: 100%;
+            min-width: 0;
+            min-height: 0;
+            place-items: center;
+            overflow: hidden;
+        }
+
+        .lightbox-image-wrap img {
+            display: block;
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: calc(100dvh - 160px);
+            object-fit: contain;
+        }
+
+        .lightbox .arrow-button {
+            width: 44px;
+            height: 48px;
+            border-color: rgba(255, 255, 255, 0.35);
+            background: #343430;
+            color: #ffffff;
+        }
+
+        .lightbox-counter {
+            flex: 0 0 auto;
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
         @media (max-width: 480px) {
             body {
                 padding: 0;
@@ -258,6 +347,25 @@
             }
 
             .arrow-button {
+                width: 36px;
+            }
+
+            .photo-stage {
+                height: 58dvh;
+                min-height: 350px;
+                max-height: 540px;
+            }
+
+            .lightbox {
+                padding: 0.75rem;
+            }
+
+            .lightbox-content {
+                grid-template-columns: 38px minmax(0, 1fr) 38px;
+                gap: 0.25rem;
+            }
+
+            .lightbox .arrow-button {
                 width: 36px;
             }
         }
@@ -315,11 +423,26 @@
                 </div>
                 <button class="delete-button" id="delete-button" type="button" hidden>Excluir</button>
             </section>
-            <p class="gallery-status" id="gallery-status" role="status" aria-live="polite"></p>
+            <output class="gallery-status" id="gallery-status" aria-live="polite"></output>
         </main>
 
-        {% include "partials/footer.html" with footer_is_pix=True %}
     </div>
+
+    <dialog class="lightbox" id="lightbox" aria-label="Foto ampliada">
+        <div class="lightbox-toolbar">
+            <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Fechar foto ampliada" title="Fechar">&times;</button>
+        </div>
+        <div class="lightbox-content">
+            <button class="arrow-button" id="lightbox-previous" type="button" aria-label="Foto anterior" title="Foto anterior">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+            </button>
+            <div class="lightbox-image-wrap" id="lightbox-image-wrap"></div>
+            <button class="arrow-button" id="lightbox-next" type="button" aria-label="Próxima foto" title="Próxima foto">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+            </button>
+        </div>
+        <p class="lightbox-counter" id="lightbox-counter"></p>
+    </dialog>
 
     <script>
         const photosApi = '/api/fotos/';
@@ -333,6 +456,11 @@
         const deleteButton = document.getElementById('delete-button');
         const previousButton = document.getElementById('previous-button');
         const nextButton = document.getElementById('next-button');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImageWrap = document.getElementById('lightbox-image-wrap');
+        const lightboxCounter = document.getElementById('lightbox-counter');
+        const lightboxPrevious = document.getElementById('lightbox-previous');
+        const lightboxNext = document.getElementById('lightbox-next');
         const deleteTokens = new Map();
         let photos = [];
         let selectedIndex = 0;
@@ -357,6 +485,7 @@
                 deleteButton.hidden = true;
                 previousButton.disabled = true;
                 nextButton.disabled = true;
+                if (lightbox.open) lightbox.close();
                 return;
             }
 
@@ -365,11 +494,28 @@
             const image = document.createElement('img');
             image.src = photo.url;
             image.alt = `Foto ${selectedIndex + 1} de ${photos.length} do casamento`;
+            image.addEventListener('click', () => {
+                renderLightboxPhoto();
+                lightbox.showModal();
+            });
             photoStage.replaceChildren(image);
             photoCounter.textContent = `${selectedIndex + 1} de ${photos.length}`;
             deleteButton.hidden = !deleteTokens.has(photo.id);
             previousButton.disabled = photos.length < 2;
             nextButton.disabled = photos.length < 2;
+            renderLightboxPhoto();
+        }
+
+        function renderLightboxPhoto() {
+            if (!photos.length) return;
+            const photo = photos[selectedIndex];
+            const image = document.createElement('img');
+            image.src = photo.url;
+            image.alt = `Foto ampliada ${selectedIndex + 1} de ${photos.length} do casamento`;
+            lightboxImageWrap.replaceChildren(image);
+            lightboxCounter.textContent = `${selectedIndex + 1} de ${photos.length}`;
+            lightboxPrevious.disabled = photos.length < 2;
+            lightboxNext.disabled = photos.length < 2;
         }
 
         async function refreshPhotos() {
@@ -436,6 +582,17 @@
 
         previousButton.addEventListener('click', () => changePhoto(-1));
         nextButton.addEventListener('click', () => changePhoto(1));
+        lightboxPrevious.addEventListener('click', () => changePhoto(-1));
+        lightboxNext.addEventListener('click', () => changePhoto(1));
+        document.getElementById('lightbox-close').addEventListener('click', () => lightbox.close());
+        lightbox.addEventListener('click', (event) => {
+            if (event.target === lightbox) lightbox.close();
+        });
+        document.addEventListener('keydown', (event) => {
+            if (!lightbox.open) return;
+            if (event.key === 'ArrowLeft') changePhoto(-1);
+            if (event.key === 'ArrowRight') changePhoto(1);
+        });
 
         deleteButton.addEventListener('click', async () => {
             const photo = photos[selectedIndex];
